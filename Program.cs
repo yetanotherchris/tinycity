@@ -13,7 +13,6 @@ namespace TinyCity
     {
         async static Task<int> Main(string[] args)
         {
-            EnsureDownloadedBackupIsRemoved();
             Console.OutputEncoding = Encoding.UTF8; // emoji support
 
             var stopWatch = Stopwatch.StartNew();
@@ -26,17 +25,14 @@ namespace TinyCity
             
             var searchCommandInstance = serviceProvider.GetRequiredService<SearchCommandHandler>();
             var listCommandInstance = serviceProvider.GetRequiredService<ListCommandHandler>();
-            var updateCommandInstance = serviceProvider.GetRequiredService<UpdateCommandHandler>();
             var configCommandInstance = serviceProvider.GetRequiredService<ConfigCommandHandler>();
 
             var searchCommand = searchCommandInstance.CreateCommand(extraArgHandler);
             var listCommand = listCommandInstance.CreateCommand(extraArgHandler);
-            var updateCommand = updateCommandInstance.CreateCommand(extraArgHandler);
             var configCommand = configCommandInstance.CreateCommand(extraArgHandler);
 
             rootCommand.AddCommand(searchCommand);
             rootCommand.AddCommand(listCommand);
-            rootCommand.AddCommand(updateCommand);
             rootCommand.AddCommand(configCommand);
 
             var commandLineBuilder = new CommandLineBuilder(rootCommand)
@@ -68,18 +64,8 @@ namespace TinyCity
             services.AddSingleton<ConfigCommandHandler>();
             services.AddSingleton<SearchCommandHandler>();
             services.AddSingleton<ListCommandHandler>();
-            services.AddSingleton<UpdateCommandHandler>();
 
             return services;
-        }
-
-        static void EnsureDownloadedBackupIsRemoved()
-        {
-            string backupFilename = $"{Environment.ProcessPath}.bak";
-            if (Path.Exists(backupFilename))
-            {
-                File.Delete(backupFilename);
-            }
         }
     }
 }

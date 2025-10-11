@@ -17,10 +17,14 @@ Write-Output "{
   `"version`": `"$version`",
   `"architecture`": {
       `"64bit`": {
-          `"url`": `"https://github.com/yetanotherchris/tiny-city/releases/download/v$version/tinycity.exe`",
-          `"bin`": [
+            `"url`": `"https://github.com/yetanotherchris/tiny-city/releases/download/v$version/tinycity.exe`",
+            `"extract_dir`": `"`",
+            `"pre_install`": [
+                `"Rename-Item \`"$dir\\tinycity-v1.4.0-win-x64.exe\`" \`"tinycity.exe\`"`"
+            ],
+            `"bin`": [
               `"tinycity.exe`"
-          ],
+            ],
           `"hash`": `"$hash`"
       }
   },
