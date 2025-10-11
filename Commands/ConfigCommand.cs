@@ -1,27 +1,20 @@
 ﻿using Spectre.Console;
 using TinyCity.BookmarkEngines;
-using Microsoft.Extensions.DependencyInjection;
+using TinyCity.Commands.Settings;
 
 namespace TinyCity.Commands
 {
-    public class ConfigCommandSettings : BaseSettings
-    {
-        public string? AddMarkdownFile { get; set; }
-        public string? RemoveMarkdownFile { get; set; }
-        public string? Browser { get; set; }
-        public string? HtmlBookmarkFile { get; set; }
-        public string? BrowserBookmarkPath { get; set; }
-    }
 
     public class ConfigCommand : BaseCommand<ConfigCommandSettings>
     {
         private readonly TinyCitySettings _tinyCitySettings;
         private readonly BookmarkAggregator _bookmarkAggregator;
 
-        public ConfigCommand(IServiceProvider serviceProvider) : base(serviceProvider)
+        public ConfigCommand(IServiceProvider serviceProvider, TinyCitySettings tinyCitySettings, BookmarkAggregator bookmarkAggregator) 
+            : base(serviceProvider)
         {
-            _tinyCitySettings = serviceProvider.GetRequiredService<TinyCitySettings>();
-            _bookmarkAggregator = serviceProvider.GetRequiredService<BookmarkAggregator>();
+            _tinyCitySettings = tinyCitySettings;
+            _bookmarkAggregator = bookmarkAggregator;
         }
 
         public override Task<int> ExecuteAsync(ConfigCommandSettings settings)

@@ -4,26 +4,16 @@ using System.Diagnostics;
 using System.Text;
 using TinyCity.BookmarkEngines;
 using TinyCity.Model;
-using Microsoft.Extensions.DependencyInjection;
+using TinyCity.Commands.Settings;
 
 namespace TinyCity.Commands
 {
-    public class SearchCommandSettings : BaseSettings
-    {
-        public bool Launch { get; set; }
-        public bool SearchUrls { get; set; }
-        public string Query { get; set; } = string.Empty;
-        public bool Export { get; set; }
-        public string ExportFormat { get; set; } = "- [{name}]({url}) ({urlhost})";
-    }
-
     public class SearchCommand : BaseCommand<SearchCommandSettings>
     {
         private List<BookmarkNode> _combinedBookmarks;
 
-        public SearchCommand(IServiceProvider serviceProvider) : base(serviceProvider)
+        public SearchCommand(IServiceProvider serviceProvider, BookmarkAggregator bookmarkAggregator) : base(serviceProvider)
         {
-            var bookmarkAggregator = serviceProvider.GetRequiredService<BookmarkAggregator>();
             _combinedBookmarks = bookmarkAggregator.AllBookmarks;
         }
 

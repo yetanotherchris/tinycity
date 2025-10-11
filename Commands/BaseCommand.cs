@@ -1,10 +1,7 @@
-﻿namespace TinyCity.Commands
+﻿using TinyCity.Commands.Settings;
+
+namespace TinyCity.Commands
 {
-    public class BaseSettings
-    {
-        public bool Extra { get; set; }
-    }
-    
     public abstract class BaseCommand<TSettings> where TSettings : BaseSettings, new()
     {
         protected readonly IServiceProvider _serviceProvider;

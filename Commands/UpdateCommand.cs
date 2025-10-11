@@ -1,15 +1,16 @@
 ﻿using Spectre.Console;
-using Microsoft.Extensions.DependencyInjection;
+using TinyCity.Commands.Settings;
 
 namespace TinyCity.Commands
 {
-    public class UpdateCommand : BaseCommand<BaseSettings>
+
+    public class UpdateCommand : BaseCommand<UpdateCommandSettings>
     {
         public UpdateCommand(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
         
-        public override Task<int> ExecuteAsync(BaseSettings settings)
+        public override Task<int> ExecuteAsync(UpdateCommandSettings settings)
         {
             string fileUrl = "";
 

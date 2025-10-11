@@ -2,23 +2,17 @@
 using System.Text;
 using TinyCity.BookmarkEngines;
 using TinyCity.Model;
-using Microsoft.Extensions.DependencyInjection;
+using TinyCity.Commands.Settings;
 
 namespace TinyCity.Commands
 {
-    public class ListCommandSettings : BaseSettings
-    {
-        public bool Export { get; set; }
-        public string ExportFormat { get; set; } = "- [{name}]({url}) ({urlhost})";
-    }
 
     public class ListCommand : BaseCommand<ListCommandSettings>
     {
         private List<BookmarkNode> _combinedBookmarks;
 
-        public ListCommand(IServiceProvider serviceProvider) : base(serviceProvider)
+        public ListCommand(IServiceProvider serviceProvider, BookmarkAggregator bookmarkAggregator) : base(serviceProvider)
         {
-            var bookmarkAggregator = serviceProvider.GetRequiredService<BookmarkAggregator>();
             _combinedBookmarks = bookmarkAggregator.AllBookmarks;
         }
 
