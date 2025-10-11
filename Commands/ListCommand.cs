@@ -12,7 +12,7 @@ namespace TinyCity.Commands
     {
         private List<BookmarkNode> _combinedBookmarks;
 
-        public ListCommand(IServiceProvider serviceProvider, BookmarkAggregator bookmarkAggregator) : base(serviceProvider)
+        public ListCommand(BookmarkAggregator bookmarkAggregator)
         {
             _combinedBookmarks = bookmarkAggregator.AllBookmarks;
         }

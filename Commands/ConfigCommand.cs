@@ -12,8 +12,7 @@ namespace TinyCity.Commands
         private readonly TinyCitySettings _tinyCitySettings;
         private readonly BookmarkAggregator _bookmarkAggregator;
 
-        public ConfigCommand(IServiceProvider serviceProvider, TinyCitySettings tinyCitySettings, BookmarkAggregator bookmarkAggregator) 
-            : base(serviceProvider)
+        public ConfigCommand(TinyCitySettings tinyCitySettings, BookmarkAggregator bookmarkAggregator)
         {
             _tinyCitySettings = tinyCitySettings;
             _bookmarkAggregator = bookmarkAggregator;

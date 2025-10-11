@@ -14,7 +14,7 @@ namespace TinyCity.Commands
     {
         private List<BookmarkNode> _combinedBookmarks;
 
-        public SearchCommand(IServiceProvider serviceProvider, BookmarkAggregator bookmarkAggregator) : base(serviceProvider)
+        public SearchCommand(BookmarkAggregator bookmarkAggregator)
         {
             _combinedBookmarks = bookmarkAggregator.AllBookmarks;
         }

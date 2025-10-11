@@ -8,7 +8,7 @@ namespace TinyCity.Commands
 
     public class UpdateCommand : BaseCommand<UpdateCommandSettings>
     {
-        public UpdateCommand(IServiceProvider serviceProvider) : base(serviceProvider)
+        public UpdateCommand()
         {
         }
         
