@@ -1,7 +1,5 @@
-using Microsoft.Extensions.DependencyInjection;
 using System.CommandLine;
 using System.CommandLine.Binding;
-using TinyCity.Commands.Settings;
 
 namespace TinyCity.Commands.Settings
 {
@@ -30,13 +28,6 @@ namespace TinyCity.Commands.Settings
             _exportFormatOption = new Option<string>("--export-format", () => "- [{name}]({url}) ({urlhost})", "When exporting, sets the format of each link");
         }
 
-        public Argument<string> QueryArgument => _queryArgument;
-        public Option<bool> ExtraOption => _extraOption;
-        public Option<bool> LaunchOption => _launchOption;
-        public Option<bool> SearchUrlsOption => _searchUrlsOption;
-        public Option<bool> ExportOption => _exportOption;
-        public Option<string> ExportFormatOption => _exportFormatOption;
-
         protected override SearchCommandSettings GetBoundValue(BindingContext bindingContext)
         {
             return new SearchCommandSettings
@@ -50,14 +41,14 @@ namespace TinyCity.Commands.Settings
             };
         }
 
-        internal void ConfigureCommand(Command command)
+        internal void AddOptionsToCommand(Command command)
         {
-            command.AddArgument(QueryArgument);
-            command.AddOption(ExtraOption);
-            command.AddOption(LaunchOption);
-            command.AddOption(SearchUrlsOption);
-            command.AddOption(ExportOption);
-            command.AddOption(ExportFormatOption);
+            command.AddArgument(_queryArgument);
+            command.AddOption(_extraOption);
+            command.AddOption(_launchOption);
+            command.AddOption(_searchUrlsOption);
+            command.AddOption(_exportOption);
+            command.AddOption(_exportFormatOption);
         }
     }
 }

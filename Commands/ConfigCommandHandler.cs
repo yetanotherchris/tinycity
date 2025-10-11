@@ -7,12 +7,12 @@ using TinyCity.Commands.Settings;
 namespace TinyCity.Commands
 {
 
-    public class ConfigCommand : BaseCommand<ConfigCommandSettings>
+    public class ConfigCommandHandler : BaseCommandHandler<ConfigCommandSettings>
     {
         private readonly TinyCitySettings _tinyCitySettings;
         private readonly BookmarkAggregator _bookmarkAggregator;
 
-        public ConfigCommand(TinyCitySettings tinyCitySettings, BookmarkAggregator bookmarkAggregator)
+        public ConfigCommandHandler(TinyCitySettings tinyCitySettings, BookmarkAggregator bookmarkAggregator)
         {
             _tinyCitySettings = tinyCitySettings;
             _bookmarkAggregator = bookmarkAggregator;
@@ -142,24 +142,24 @@ namespace TinyCity.Commands
             AnsiConsole.MarkupLine($"[bold green]Saved browser bookmark path: {bookmarkPath}[/]");
         }
 
-        public static Command CreateCommand(IServiceProvider serviceProvider, ExtraInfoInterceptor interceptor, Action<Exception> onException)
+        public override Command CreateCommand(ExtraArgumentHandler extraArgumentHandler)
         {
             var command = new Command("config", "Configure bookmark sources.");
 
             var settingsBinder = new ConfigCommandSettings();
-            settingsBinder.ConfigureCommand(command);
+            settingsBinder.AddOptionsToCommand(command);
 
             command.SetHandler(async (ConfigCommandSettings settings) =>
             {
                 try
                 {
-                    var configCommandInstance = serviceProvider.GetRequiredService<ConfigCommand>();
-                    interceptor.SetShowExtraInfo(settings.Extra);
-                    await configCommandInstance.ExecuteAsync(settings);
+                    extraArgumentHandler.SetShowExtraInfo(settings.Extra);
+                    await ExecuteAsync(settings);
                 }
                 catch (Exception ex)
                 {
-                    onException(ex);
+                    AnsiConsole.MarkupLine($"[red]{Markup.Escape(ex.Message)}[/]");
+                    AnsiConsole.MarkupLine(Markup.Escape(ex.ToString()));
                 }
             }, settingsBinder);
 

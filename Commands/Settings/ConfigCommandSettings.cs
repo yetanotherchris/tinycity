@@ -1,7 +1,5 @@
-using Microsoft.Extensions.DependencyInjection;
 using System.CommandLine;
 using System.CommandLine.Binding;
-using TinyCity.Commands.Settings;
 
 namespace TinyCity.Commands.Settings
 {
@@ -30,13 +28,6 @@ namespace TinyCity.Commands.Settings
             _browserBookmarkPathOption = new Option<string?>(new[] { "-p", "--browser-bookmark-path" }, "Sets a Browser bookmark path, if the default doesn't exist.");
         }
 
-        public Option<bool> ExtraOption => _extraOption;
-        public Option<string?> AddMarkdownOption => _addMarkdownOption;
-        public Option<string?> RemoveMarkdownOption => _removeMarkdownOption;
-        public Option<string?> BrowserOption => _browserOption;
-        public Option<string?> HtmlBookmarkOption => _htmlBookmarkOption;
-        public Option<string?> BrowserBookmarkPathOption => _browserBookmarkPathOption;
-
         protected override ConfigCommandSettings GetBoundValue(BindingContext bindingContext)
         {
             return new ConfigCommandSettings
@@ -50,14 +41,14 @@ namespace TinyCity.Commands.Settings
             };
         }
 
-        internal void ConfigureCommand(Command command)
+        internal void AddOptionsToCommand(Command command)
         {
-            command.AddOption(ExtraOption);
-            command.AddOption(AddMarkdownOption);
-            command.AddOption(RemoveMarkdownOption);
-            command.AddOption(BrowserOption);
-            command.AddOption(HtmlBookmarkOption);
-            command.AddOption(BrowserBookmarkPathOption);
+            command.AddOption(_extraOption);
+            command.AddOption(_addMarkdownOption);
+            command.AddOption(_removeMarkdownOption);
+            command.AddOption(_browserOption);
+            command.AddOption(_htmlBookmarkOption);
+            command.AddOption(_browserBookmarkPathOption);
         }
     }
 }

@@ -10,11 +10,11 @@ using TinyCity.Commands.Settings;
 
 namespace TinyCity.Commands
 {
-    public class SearchCommand : BaseCommand<SearchCommandSettings>
+    public class SearchCommandHandler : BaseCommandHandler<SearchCommandSettings>
     {
-        private List<BookmarkNode> _combinedBookmarks;
+        private readonly List<BookmarkNode> _combinedBookmarks;
 
-        public SearchCommand(BookmarkAggregator bookmarkAggregator)
+        public SearchCommandHandler(BookmarkAggregator bookmarkAggregator)
         {
             _combinedBookmarks = bookmarkAggregator.AllBookmarks;
         }
@@ -96,25 +96,25 @@ namespace TinyCity.Commands
             }
         }
 
-        public static Command CreateCommand(IServiceProvider serviceProvider, ExtraInfoInterceptor interceptor, Action<Exception> onException)
+        public override Command CreateCommand(ExtraArgumentHandler extraArgumentHandler)
         {
             var command = new Command("search", "Search the bookmarks.");
             command.AddAlias("q");
 
             var settings = new SearchCommandSettings();
-            settings.ConfigureCommand(command);
+            settings.AddOptionsToCommand(command);
 
             command.SetHandler(async (SearchCommandSettings settings) =>
             {
                 try
                 {
-                    var searchCommandInstance = serviceProvider.GetRequiredService<SearchCommand>();
-                    interceptor.SetShowExtraInfo(settings.Extra);
-                    await searchCommandInstance.ExecuteAsync(settings);
+                    extraArgumentHandler.SetShowExtraInfo(settings.Extra);
+                    await ExecuteAsync(settings);
                 }
                 catch (Exception ex)
                 {
-                    onException(ex);
+                    AnsiConsole.MarkupLine($"[red]{Markup.Escape(ex.Message)}[/]");
+                    AnsiConsole.MarkupLine(Markup.Escape(ex.ToString()));
                 }
             }, settings);
 

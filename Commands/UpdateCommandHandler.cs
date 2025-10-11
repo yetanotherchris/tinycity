@@ -6,9 +6,9 @@ using TinyCity.Commands.Settings;
 namespace TinyCity.Commands
 {
 
-    public class UpdateCommand : BaseCommand<UpdateCommandSettings>
+    public class UpdateCommandHandler : BaseCommandHandler<UpdateCommandSettings>
     {
-        public UpdateCommand()
+        public UpdateCommandHandler()
         {
         }
         
@@ -128,24 +128,24 @@ namespace TinyCity.Commands
             });
         }
 
-        public static Command CreateCommand(IServiceProvider serviceProvider, ExtraInfoInterceptor interceptor, Action<Exception> onException)
+        public override Command CreateCommand(ExtraArgumentHandler extraArgumentHandler)
         {
             var command = new Command("update", "Updates Tinycity, downloading the latest release from Github.");
 
             var settingsBinder = new UpdateCommandSettings();
-            settingsBinder.ConfigureCommand(command);
+            settingsBinder.AddOptionsToCommand(command);
 
             command.SetHandler(async (UpdateCommandSettings settings) =>
             {
                 try
                 {
-                    var updateCommandInstance = serviceProvider.GetRequiredService<UpdateCommand>();
-                    interceptor.SetShowExtraInfo(settings.Extra);
-                    await updateCommandInstance.ExecuteAsync(settings);
+                    extraArgumentHandler.SetShowExtraInfo(settings.Extra);
+                    await ExecuteAsync(settings);
                 }
                 catch (Exception ex)
                 {
-                    onException(ex);
+                    AnsiConsole.MarkupLine($"[red]{Markup.Escape(ex.Message)}[/]");
+                    AnsiConsole.MarkupLine(Markup.Escape(ex.ToString()));
                 }
             }, settingsBinder);
 

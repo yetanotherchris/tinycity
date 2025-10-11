@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Spectre.Console;
+﻿using Spectre.Console;
 using System.CommandLine;
 using System.Text;
 using TinyCity.BookmarkEngines;
@@ -8,11 +7,11 @@ using TinyCity.Commands.Settings;
 
 namespace TinyCity.Commands
 {
-    public class ListCommand : BaseCommand<ListCommandSettings>
+    public class ListCommandHandler : BaseCommandHandler<ListCommandSettings>
     {
-        private List<BookmarkNode> _combinedBookmarks;
+        private readonly List<BookmarkNode> _combinedBookmarks;
 
-        public ListCommand(BookmarkAggregator bookmarkAggregator)
+        public ListCommandHandler(BookmarkAggregator bookmarkAggregator)
         {
             _combinedBookmarks = bookmarkAggregator.AllBookmarks;
         }
@@ -51,25 +50,25 @@ namespace TinyCity.Commands
             return Task.FromResult(0);
         }
 
-        public static Command CreateCommand(IServiceProvider serviceProvider, ExtraInfoInterceptor interceptor, Action<Exception> onException)
+        public override Command CreateCommand(ExtraArgumentHandler extraArgumentHandler)
         {
             var command = new Command("ls", "List all bookmarks.");
             command.AddAlias("list");
 
             var settingsBinder = new ListCommandSettings();
-            settingsBinder.ConfigureCommand(command);
+            settingsBinder.AddOptionsToCommand(command);
 
             command.SetHandler(async (ListCommandSettings settings) =>
             {
                 try
                 {
-                    var listCommandInstance = serviceProvider.GetRequiredService<ListCommand>();
-                    interceptor.SetShowExtraInfo(settings.Extra);
-                    await listCommandInstance.ExecuteAsync(settings);
+                    extraArgumentHandler.SetShowExtraInfo(settings.Extra);
+                    await ExecuteAsync(settings);
                 }
                 catch (Exception ex)
                 {
-                    onException(ex);
+                    AnsiConsole.MarkupLine($"[red]{Markup.Escape(ex.Message)}[/]");
+                    AnsiConsole.MarkupLine(Markup.Escape(ex.ToString()));
                 }
             }, settingsBinder);
 

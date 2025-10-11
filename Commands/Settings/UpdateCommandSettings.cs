@@ -1,7 +1,5 @@
-using Microsoft.Extensions.DependencyInjection;
 using System.CommandLine;
 using System.CommandLine.Binding;
-using TinyCity.Commands.Settings;
 
 namespace TinyCity.Commands.Settings
 {
@@ -14,8 +12,6 @@ namespace TinyCity.Commands.Settings
             _extraOption = new Option<bool>("--extra", "Displays extra information including how long the application took to run.");
         }
 
-        public Option<bool> ExtraOption => _extraOption;
-
         protected override UpdateCommandSettings GetBoundValue(BindingContext bindingContext)
         {
             return new UpdateCommandSettings
@@ -24,9 +20,9 @@ namespace TinyCity.Commands.Settings
             };
         }
 
-        internal void ConfigureCommand(Command command)
+        internal void AddOptionsToCommand(Command command)
         {
-            command.AddOption(ExtraOption);
+            command.AddOption(_extraOption);
         }
     }
 }
