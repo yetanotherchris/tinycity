@@ -1,19 +1,19 @@
 {
-  "version": "1.0.33",
-  "architecture": {
-        "64bit": {
-        "url": "https://github.com/yetanotherchris/tiny-city/releases/download/v1.0.33/tinycity.exe",
-        "extract_dir": "",
-        "pre_install": [
-            "Rename-Item \"$dir\\tinycity-v1.4.0-win-x64.exe\" \"tinycity.exe\""
-        ],
-        "bin": [
-            "tinycity.exe"
-        ],
-        "hash": "8EAB5CF70BD096FCF052BBEF2552320178B7E4C09B1975AD0B84029D00C848DB"
-      }
-  },
-  "homepage": "https://github.com/yetanotherchris/tiny-city",
   "license": "MIT License",
-  "description": "A console app written that lists and searches your bookmarks files"
+  "homepage": "https://github.com/yetanotherchris/tiny-city",
+  "architecture": {
+    "64bit": {
+      "url": "https://github.com/yetanotherchris/tiny-city/releases/download/v2.0.3/tinycity-v2.0.3-win-x64.exe",
+      "extract_dir": "",
+      "bin": [
+        "tinycity.exe"
+      ],
+      "pre_install": [
+        "Rename-Item \"$dir\\tinycity-v2.0.3-win-x64.exe\" \"tinycity.exe\""
+      ],
+      "hash": "4C987E15331F407CC67E9791F66977537FEAB2FE4DD5327A64FC3D93939FC2FC"
+    }
+  },
+  "description": "Ask any large language model from your terminal via OpenAI-compatible APIs.",
+  "version": "2.0.3"
 }
