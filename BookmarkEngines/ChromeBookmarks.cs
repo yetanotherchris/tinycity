@@ -18,11 +18,7 @@ namespace TinyCity.BookmarkEngines
             }
 
             string json = File.ReadAllText(settings.BrowserBookmarkFullPath);           
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
-            var bookmarks = JsonSerializer.Deserialize<BookmarksFile>(json, options);
+            var bookmarks = JsonSerializer.Deserialize(json, TinyCityJsonContext.Default.BookmarksFile);
 
             FlattenedBookmarks = new List<BookmarkNode>();
             if (bookmarks != null)

@@ -20,7 +20,7 @@ namespace TinyCity
             if (File.Exists(configFilePath))
             {
                 var json = File.ReadAllText(configFilePath);
-                return JsonSerializer.Deserialize<TinyCitySettings>(json) ?? new TinyCitySettings();
+                return JsonSerializer.Deserialize(json, TinyCityJsonContext.Default.TinyCitySettings) ?? new TinyCitySettings();
             }
             else
             {
@@ -35,7 +35,7 @@ namespace TinyCity
         public static void Save(TinyCitySettings settings)
         {
             var configFilePath = GetConfigFilePath();
-            string json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
+            string json = JsonSerializer.Serialize(settings, TinyCityJsonContext.Default.TinyCitySettings);
             File.WriteAllText(configFilePath, json);
         }
 
