@@ -1,12 +1,19 @@
-﻿using Spectre.Console.Cli;
-using System.ComponentModel;
-
-namespace TinyCity.Commands
+﻿namespace TinyCity.Commands
 {
-    public class BaseSettings : CommandSettings
+    public class BaseSettings
     {
-        [CommandOption("--extra")]
-        [Description("Displays extra information including how long the application took to run.")]
         public bool Extra { get; set; }
+    }
+    
+    public abstract class BaseCommand<TSettings> where TSettings : BaseSettings, new()
+    {
+        protected readonly IServiceProvider _serviceProvider;
+        
+        protected BaseCommand(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
+        }
+        
+        public abstract Task<int> ExecuteAsync(TSettings settings);
     }
 }

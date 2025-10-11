@@ -1,35 +1,28 @@
 ﻿using Spectre.Console;
-using Spectre.Console.Cli;
-using System.ComponentModel;
 using System.Text;
 using TinyCity.BookmarkEngines;
 using TinyCity.Model;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TinyCity.Commands
 {
     public class ListCommandSettings : BaseSettings
     {
-        [CommandOption("-e|--export")]
-        [Description("Exports the results as 'exported-bookmarks.md' to the same directory as tinycity.")]
-        [DefaultValue(false)]
         public bool Export { get; set; }
-
-        [CommandOption("--export-format")]
-        [Description("When exporting, sets the format of each link")]
-        [DefaultValue("- [{name}]({url}) ({urlhost})")]
-        public string ExportFormat { get; set; }
+        public string ExportFormat { get; set; } = "- [{name}]({url}) ({urlhost})";
     }
 
-    public class ListCommand : Command<ListCommandSettings>
+    public class ListCommand : BaseCommand<ListCommandSettings>
     {
         private List<BookmarkNode> _combinedBookmarks;
 
-        public ListCommand(BookmarkAggregator bookmarkAggregator)
+        public ListCommand(IServiceProvider serviceProvider) : base(serviceProvider)
         {
+            var bookmarkAggregator = serviceProvider.GetRequiredService<BookmarkAggregator>();
             _combinedBookmarks = bookmarkAggregator.AllBookmarks;
         }
 
-        public override int Execute(CommandContext context, ListCommandSettings settings)
+        public override Task<int> ExecuteAsync(ListCommandSettings settings)
         {
             var exportStringBuilder = new StringBuilder();
             AnsiConsole.MarkupLine($"[bold turquoise2]{_combinedBookmarks.Count} unique bookmarks in total.[/]");
@@ -60,7 +53,7 @@ namespace TinyCity.Commands
                 AnsiConsole.MarkupLine($"[bold green]Exported to all bookmarks 'exported-bookmarks.md'[/].");
             }
 
-            return 0;
+            return Task.FromResult(0);
         }
     }
 }

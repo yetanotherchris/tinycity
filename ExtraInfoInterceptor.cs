@@ -1,11 +1,10 @@
 ﻿using System.Diagnostics;
 using Spectre.Console;
-using Spectre.Console.Cli;
 using TinyCity.Commands;
 
 namespace TinyCity
 {
-    public class ExtraInfoInterceptor : ICommandInterceptor
+    public class ExtraInfoInterceptor
     {
         private bool _showExtraInfo;
 
@@ -14,15 +13,12 @@ namespace TinyCity
             _showExtraInfo = false;
         }
 
-        public void Intercept(CommandContext context, CommandSettings settings)
+        public void SetShowExtraInfo(bool showExtraInfo)
         {
-            if (settings is BaseSettings baseSettings && baseSettings.Extra)
-            {
-                _showExtraInfo = true;
-            }
+            _showExtraInfo = showExtraInfo;
         }
 
-        public void ShowOutput(Stopwatch stopwatch, Exception ex)
+        public void ShowOutput(Stopwatch stopwatch, Exception? ex)
         {
             if (_showExtraInfo)
             {

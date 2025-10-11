@@ -1,51 +1,33 @@
 ﻿using Spectre.Console;
-using Spectre.Console.Cli;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
 using TinyCity.BookmarkEngines;
 using TinyCity.Model;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TinyCity.Commands
 {
     public class SearchCommandSettings : BaseSettings
     {
-        [CommandOption("-l|--launch")]
-        [Description("Launch the first bookmark found din your default browser. If no bookmarks are found, nothing will happen.")]
-        [DefaultValue(false)]
         public bool Launch { get; set; }
-
-        [CommandOption("-u|--urls")]
-        [Description("Also search bookmark urls.")]
-        [DefaultValue(false)]
         public bool SearchUrls { get; set; }
-
-        [CommandArgument(0, "<query>")]
-        [Description("The search term to look for in bookmarks. Enclose your search inside quotes, e.g. \"my search words\"")]
-        public required string Query { get; set; }
-
-        [CommandOption("-e|--export")]
-        [Description("Exports the results as 'exported-bookmarks.md' to the same directory as tinycity.")]
-        [DefaultValue(false)]
+        public string Query { get; set; } = string.Empty;
         public bool Export { get; set; }
-
-        [CommandOption("--export-format")]
-        [Description("When exporting, sets the format of each link")]
-        [DefaultValue("- [{name}]({url}) ({urlhost})")]
-        public string ExportFormat { get; set; }
+        public string ExportFormat { get; set; } = "- [{name}]({url}) ({urlhost})";
     }
 
-    public class SearchCommand : Command<SearchCommandSettings>
+    public class SearchCommand : BaseCommand<SearchCommandSettings>
     {
         private List<BookmarkNode> _combinedBookmarks;
 
-        public SearchCommand(BookmarkAggregator bookmarkAggregator)
+        public SearchCommand(IServiceProvider serviceProvider) : base(serviceProvider)
         {
+            var bookmarkAggregator = serviceProvider.GetRequiredService<BookmarkAggregator>();
             _combinedBookmarks = bookmarkAggregator.AllBookmarks;
         }
 
-        public override int Execute(CommandContext context, SearchCommandSettings settings)
+        public override Task<int> ExecuteAsync(SearchCommandSettings settings)
         {
             var exportStringBuilder = new StringBuilder();
             var filteredBookmarks = Search(settings.Query, settings.SearchUrls);
@@ -53,7 +35,7 @@ namespace TinyCity.Commands
             if (count == 0)
             {
                 AnsiConsole.MarkupLine($"[bold yellow]No bookmarks found for '{settings.Query}'.[/]");
-                return 0;
+                return Task.FromResult(0);
             }
 
             AnsiConsole.MarkupLine($"[bold turquoise2]{count} bookmark(s) found for '{settings.Query}'.[/]");
@@ -80,15 +62,18 @@ namespace TinyCity.Commands
             if (settings.Launch)
             {
                 var first = filteredBookmarks.FirstOrDefault();
-                AnsiConsole.MarkupLine($"[bold green]Launching '{first.Name}'[/]...");
-
-                var startInfo = new ProcessStartInfo
+                if (first != null)
                 {
-                    FileName = first.Url,
-                    UseShellExecute = true
-                };
+                    AnsiConsole.MarkupLine($"[bold green]Launching '{first.Name}'[/]...");
 
-                Process.Start(startInfo);
+                    var startInfo = new ProcessStartInfo
+                    {
+                        FileName = first.Url,
+                        UseShellExecute = true
+                    };
+
+                    Process.Start(startInfo);
+                }
             }
             else if (settings.Export)
             {
@@ -96,7 +81,7 @@ namespace TinyCity.Commands
                 AnsiConsole.MarkupLine($"[bold green]Exported search results to 'exported-bookmarks.md'[/].");
             }
 
-            return 0;
+            return Task.FromResult(0);
         }
 
         private List<BookmarkNode> Search(string searchTerm, bool searchUrls)

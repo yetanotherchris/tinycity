@@ -1,45 +1,30 @@
 ﻿using Spectre.Console;
-using Spectre.Console.Cli;
-using System.ComponentModel;
 using TinyCity.BookmarkEngines;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TinyCity.Commands
 {
     public class ConfigCommandSettings : BaseSettings
     {
-        [CommandOption("-a|--add-markdown-file")]
-        [Description("Adds a markdown file to scan for links.")]
-        public string AddMarkdownFile { get; set; }
-
-        [CommandOption("-r|--remove-markdown-file")]
-        [Description("Remove a markdown file from the config.")]
-        public string RemoveMarkdownFile { get; set; }
-
-        [CommandOption("-b|--set-browser")]
-        [Description("Set the browser type to search bookmarks from. Valid values are: chrome, opera, brave, edge.")]
-        public string Browser { get; set; }
-
-        [CommandOption("-h|--html-bookmark-file")]
-        [Description("Sets a HTML bookmark file to scan for links.")]
-        public string HtmlBookmarkFile { get; set; }
-
-        [CommandOption("-p|--browser-bookmark-path")]
-        [Description("Sets a Browser bookmark path, if the default doesn't exist.")]
-        public string BrowserBookmarkPath { get; set; }
+        public string? AddMarkdownFile { get; set; }
+        public string? RemoveMarkdownFile { get; set; }
+        public string? Browser { get; set; }
+        public string? HtmlBookmarkFile { get; set; }
+        public string? BrowserBookmarkPath { get; set; }
     }
 
-    public class ConfigCommand : Command<ConfigCommandSettings>
+    public class ConfigCommand : BaseCommand<ConfigCommandSettings>
     {
         private readonly TinyCitySettings _tinyCitySettings;
         private readonly BookmarkAggregator _bookmarkAggregator;
 
-        public ConfigCommand(TinyCitySettings settings, BookmarkAggregator bookmarkAggregator)
+        public ConfigCommand(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            _tinyCitySettings = settings;
-            _bookmarkAggregator = bookmarkAggregator;
+            _tinyCitySettings = serviceProvider.GetRequiredService<TinyCitySettings>();
+            _bookmarkAggregator = serviceProvider.GetRequiredService<BookmarkAggregator>();
         }
 
-        public override int Execute(CommandContext context, ConfigCommandSettings settings)
+        public override Task<int> ExecuteAsync(ConfigCommandSettings settings)
         {
             if (!string.IsNullOrEmpty(settings.AddMarkdownFile))
             {
@@ -66,7 +51,7 @@ namespace TinyCity.Commands
                 ShowConfiguration();
             }
             
-            return 0;
+            return Task.FromResult(0);
         }
 
         private void ShowConfiguration()

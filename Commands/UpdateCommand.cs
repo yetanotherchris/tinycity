@@ -1,11 +1,15 @@
 ﻿using Spectre.Console;
-using Spectre.Console.Cli;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TinyCity.Commands
 {
-    public class UpdateCommand : Command<BaseSettings>
+    public class UpdateCommand : BaseCommand<BaseSettings>
     {
-        public override int Execute(CommandContext context, BaseSettings settings)
+        public UpdateCommand(IServiceProvider serviceProvider) : base(serviceProvider)
+        {
+        }
+        
+        public override Task<int> ExecuteAsync(BaseSettings settings)
         {
             string fileUrl = "";
 
@@ -24,11 +28,18 @@ namespace TinyCity.Commands
             if (string.IsNullOrEmpty(fileUrl))
             {
                 AnsiConsole.MarkupLine("[red]Unsupported OS.[/]");
-                return 1;
+                return Task.FromResult(1);
+            }
+
+            var processPath = Environment.ProcessPath;
+            if (string.IsNullOrEmpty(processPath))
+            {
+                AnsiConsole.MarkupLine("[red]Could not determine current process path.[/]");
+                return Task.FromResult(1);
             }
 
             // Download the file
-            string downloadFilename = $"{Environment.ProcessPath}.new";
+            string downloadFilename = $"{processPath}.new";
             var task = Task.Run(async () =>
             {
                 AnsiConsole.MarkupLine($"[green]Url: '{fileUrl}'.[/]");
@@ -37,12 +48,12 @@ namespace TinyCity.Commands
             task.Wait(TimeSpan.FromMinutes(5));
 
             // Backup the current process
-            string backupFilename = $"{Environment.ProcessPath}.bak";
+            string backupFilename = $"{processPath}.bak";
             if (Path.Exists(backupFilename))
             {
                 File.Delete(backupFilename);
             }
-            var processFileInfo = new FileInfo(Environment.ProcessPath);
+            var processFileInfo = new FileInfo(processPath);
             processFileInfo.MoveTo(backupFilename);
 
             // Rename the downloaded file to the current process filename
@@ -52,7 +63,7 @@ namespace TinyCity.Commands
 
             // ...tinycity.bak removal is done on startup
 
-            return 0;
+            return Task.FromResult(0);
         }
 
         private async Task Download(string localFilename, string fileUrl)

@@ -27,8 +27,7 @@
 		<PackageReference Include="markdig" Version="0.40.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
 		<PackageReference Include="Spectre.Console" Version="0.50.0" />
-		<PackageReference Include="Spectre.Console.Cli" Version="0.50.0" />
-		<PackageReference Include="Spectre.Console.Cli.Extensions.DependencyInjection" Version="0.7.0" />
+		<PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
 	</ItemGroup>
 
 </Project>
