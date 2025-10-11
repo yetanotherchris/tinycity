@@ -1,9 +1,9 @@
 {
   "license": "MIT License",
-  "homepage": "https://github.com/yetanotherchris/tiny-city",
+  "homepage": "https://github.com/yetanotherchris/tinycity",
   "architecture": {
     "64bit": {
-      "url": "https://github.com/yetanotherchris/tiny-city/releases/download/v2.0.3/tinycity-v2.0.3-win-x64.exe",
+      "url": "https://github.com/yetanotherchris/tinycity/releases/download/v2.0.3/tinycity-v2.0.3-win-x64.exe",
       "extract_dir": "",
       "bin": [
         "tinycity.exe"

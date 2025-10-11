@@ -1,4 +1,4 @@
-# tiny-city
+# tinycity
 A console app written in C# that lists and searches your bookmarks files, displaying them in the terminal and optionally launching them in your default browser. 
 It doesn't manage your bookmarks (adding/editing/deleting), it just lists and searches through them.
 
@@ -10,7 +10,7 @@ The terminal output includes links that can be clicked, using the Spectre consol
 
 ## Download
 
-[![GitHub Release](https://img.shields.io/github/v/release/yetanotherchris/tiny-city?logo=github&sort=semver)](https://github.com/yetanotherchris/tiny-city/releases/latest/)
+[![GitHub Release](https://img.shields.io/github/v/release/yetanotherchris/tinycity?logo=github&sort=semver)](https://github.com/yetanotherchris/tinycity/releases/latest/)
 
 **Package managers**
 
@@ -29,22 +29,22 @@ brew install tinycity
 **Via your terminal**
 
 ```powershell
-Invoke-WebRequest -Uri "https://github.com/yetanotherchris/tiny-city/releases/latest/download/tinycity.exe" -OutFile "tinycity.exe"
+Invoke-WebRequest -Uri "https://github.com/yetanotherchris/tinycity/releases/latest/download/tinycity.exe" -OutFile "tinycity.exe"
 ```
 ```bash
-wget -O tinycity "https://github.com/yetanotherchris/tiny-city/releases/latest/download/tinycity"
+wget -O tinycity "https://github.com/yetanotherchris/tinycity/releases/latest/download/tinycity"
 ```
 ```bash
-curl -o tinycity -L "https://github.com/yetanotherchris/tiny-city/releases/latest/download/tinycity"
+curl -o tinycity -L "https://github.com/yetanotherchris/tinycity/releases/latest/download/tinycity"
 ```
 
 Scoop.sh on Windows:
 ```
-scoop bucket add tinycity https://github.com/yetanotherchris/tiny-city/
+scoop bucket add tinycity https://github.com/yetanotherchris/tinycity/
 scoop install tinycity
 ```
 
-You can also download the latest release directly from the [Releases page](https://github.com/yetanotherchris/tiny-city/releases).
+You can also download the latest release directly from the [Releases page](https://github.com/yetanotherchris/tinycity/releases).
 
 ## Usage
 

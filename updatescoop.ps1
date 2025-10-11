@@ -21,14 +21,14 @@ $manifest = @{
     version = $Version
     architecture = @{
         '64bit' = @{
-            url = "https://github.com/yetanotherchris/tiny-city/releases/download/v$Version/tinycity-v$Version-win-x64.exe"
+            url = "https://github.com/yetanotherchris/tinycity/releases/download/v$Version/tinycity-v$Version-win-x64.exe"
             bin = @("tinycity.exe")
             hash = $hash
             extract_dir = ""
             pre_install = @("Rename-Item `"`$dir\tinycity-v$Version-win-x64.exe`" `"tinycity.exe`"")
         }
     }
-    homepage = "https://github.com/yetanotherchris/tiny-city"
+    homepage = "https://github.com/yetanotherchris/tinycity"
     license = "MIT License"
     description = "Ask any large language model from your terminal via OpenAI-compatible APIs."
 }
