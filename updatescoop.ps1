@@ -1,34 +1,37 @@
 param(
-	[Parameter(Mandatory=$true)]
-	[String]
-	$version
+    [Parameter(Mandatory = $true)]
+    [string]
+    $Version
 )
 
-$search = "*publish/tinycity.exe"
-$tinyCityFile = Get-ChildItem -Path "./bin/Release/" -Force -Recurse -File | Where-Object { $_.FullName -like $search }
-$filePath = $tinyCityFile[0].FullName
+# Look for the renamed Windows executable in the current directory
+$searchPattern = "tinycity-v$Version-win-x64.exe"
+$tinycityFile = Get-ChildItem -Path $PSScriptRoot -File | Where-Object { $_.Name -eq $searchPattern } | Select-Object -First 1
 
+if (-not $tinycityFile) {
+    throw "Unable to locate $searchPattern in the current directory."
+}
+
+$filePath = $tinycityFile.FullName
 Write-Output "File found: $filePath, getting hash..."
 $hash = (Get-FileHash -Path $filePath -Algorithm SHA256).Hash
 Write-Output "Hash: $hash"
 
-Write-Output "Creating tinycity.json for version $version..."
-Write-Output "{
-  `"version`": `"$version`",
-  `"architecture`": {
-      `"64bit`": {
-            `"url`": `"https://github.com/yetanotherchris/tiny-city/releases/download/v$version/tinycity.exe`",
-            `"extract_dir`": `"`",
-            `"pre_install`": [
-                `"Rename-Item \`"$dir\\tinycity-v1.4.0-win-x64.exe\`" \`"tinycity.exe\`"`"
-            ],
-            `"bin`": [
-              `"tinycity.exe`"
-            ],
-          `"hash`": `"$hash`"
-      }
-  },
-  `"homepage`": `"https://github.com/yetanotherchris/tiny-city`",
-  `"license`": `"MIT License`",
-  `"description`": `"A console app written that lists and searches your bookmarks files`"
-}" | Out-File -FilePath "tinycity.json" -Encoding utf8
+$manifest = @{
+    version = $Version
+    architecture = @{
+        '64bit' = @{
+            url = "https://github.com/yetanotherchris/tiny-city/releases/download/v$Version/tinycity-v$Version-win-x64.exe"
+            bin = @("tinycity.exe")
+            hash = $hash
+            extract_dir = ""
+            pre_install = @("Rename-Item `"`$dir\tinycity-v$Version-win-x64.exe`" `"tinycity.exe`"")
+        }
+    }
+    homepage = "https://github.com/yetanotherchris/tiny-city"
+    license = "MIT License"
+    description = "Ask any large language model from your terminal via OpenAI-compatible APIs."
+}
+
+Write-Output "Creating tinycity.json for version $Version..."
+$manifest | ConvertTo-Json -Depth 5 | Out-File -FilePath "tinycity.json" -Encoding utf8
