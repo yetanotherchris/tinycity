@@ -105,26 +105,36 @@ namespace TinyCity.Commands
         private void SetBrowser(string browser)
         {
             string browserLower = browser.ToLowerInvariant();
+            string browserPath;
+            string bookmarkFullPath;
+            
             switch (browserLower)
             {
                 case "chrome":
-                    _tinyCitySettings.BrowserPath = BrowserKnownPaths.ChromePath;
+                    browserPath = BrowserKnownPaths.ChromePath;
+                    bookmarkFullPath = Path.Combine(browserPath, "Default", "Bookmarks");
                     break;
                 case "opera":
-                    _tinyCitySettings.BrowserPath = BrowserKnownPaths.OperaPath;
+                    bookmarkFullPath = BrowserKnownPaths.OperaPath;
+                    browserPath = Path.GetDirectoryName(bookmarkFullPath) ?? bookmarkFullPath;
                     break;
                 case "brave":
-                    _tinyCitySettings.BrowserPath = BrowserKnownPaths.BravePath;
+                    bookmarkFullPath = BrowserKnownPaths.BravePath;
+                    browserPath = Path.GetDirectoryName(bookmarkFullPath) ?? bookmarkFullPath;
                     break;
                 case "edge":
-                    _tinyCitySettings.BrowserPath = BrowserKnownPaths.EdgePath;
+                    bookmarkFullPath = BrowserKnownPaths.EdgePath;
+                    browserPath = Path.GetDirectoryName(bookmarkFullPath) ?? bookmarkFullPath;
                     break;
                 default:
                     AnsiConsole.MarkupLine($"[bold red]Invalid browser type '{browserLower}'. Valid values are: chrome, opera, brave, edge.[/]");
                     return;
             }
 
-            AnsiConsole.MarkupLine($"[bold green]Set browser path to {_tinyCitySettings.BrowserPath}[/]");
+            _tinyCitySettings.BrowserPath = browserPath;
+            _tinyCitySettings.BrowserBookmarkFullPath = bookmarkFullPath;
+            
+            AnsiConsole.MarkupLine($"[bold green]Set browser bookmark path to {bookmarkFullPath}[/]");
             TinyCitySettings.Save(_tinyCitySettings);
         }
 
