@@ -1,51 +1,25 @@
-﻿using Spectre.Console;
-using Spectre.Console.Cli;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Spectre.Console;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.CommandLine;
 using System.Diagnostics;
 using System.Text;
 using TinyCity.BookmarkEngines;
 using TinyCity.Model;
+using TinyCity.Commands.Settings;
 
 namespace TinyCity.Commands
 {
-    public class SearchCommandSettings : BaseSettings
+    public class SearchCommandHandler : BaseCommandHandler<SearchCommandSettings>
     {
-        [CommandOption("-l|--launch")]
-        [Description("Launch the first bookmark found din your default browser. If no bookmarks are found, nothing will happen.")]
-        [DefaultValue(false)]
-        public bool Launch { get; set; }
+        private readonly List<BookmarkNode> _combinedBookmarks;
 
-        [CommandOption("-u|--urls")]
-        [Description("Also search bookmark urls.")]
-        [DefaultValue(false)]
-        public bool SearchUrls { get; set; }
-
-        [CommandArgument(0, "<query>")]
-        [Description("The search term to look for in bookmarks. Enclose your search inside quotes, e.g. \"my search words\"")]
-        public required string Query { get; set; }
-
-        [CommandOption("-e|--export")]
-        [Description("Exports the results as 'exported-bookmarks.md' to the same directory as tinycity.")]
-        [DefaultValue(false)]
-        public bool Export { get; set; }
-
-        [CommandOption("--export-format")]
-        [Description("When exporting, sets the format of each link")]
-        [DefaultValue("- [{name}]({url}) ({urlhost})")]
-        public string ExportFormat { get; set; }
-    }
-
-    public class SearchCommand : Command<SearchCommandSettings>
-    {
-        private List<BookmarkNode> _combinedBookmarks;
-
-        public SearchCommand(BookmarkAggregator bookmarkAggregator)
+        public SearchCommandHandler(BookmarkAggregator bookmarkAggregator)
         {
             _combinedBookmarks = bookmarkAggregator.AllBookmarks;
         }
 
-        public override int Execute(CommandContext context, SearchCommandSettings settings)
+        public override Task<int> ExecuteAsync(SearchCommandSettings settings)
         {
             var exportStringBuilder = new StringBuilder();
             var filteredBookmarks = Search(settings.Query, settings.SearchUrls);
@@ -53,7 +27,7 @@ namespace TinyCity.Commands
             if (count == 0)
             {
                 AnsiConsole.MarkupLine($"[bold yellow]No bookmarks found for '{settings.Query}'.[/]");
-                return 0;
+                return Task.FromResult(0);
             }
 
             AnsiConsole.MarkupLine($"[bold turquoise2]{count} bookmark(s) found for '{settings.Query}'.[/]");
@@ -80,15 +54,18 @@ namespace TinyCity.Commands
             if (settings.Launch)
             {
                 var first = filteredBookmarks.FirstOrDefault();
-                AnsiConsole.MarkupLine($"[bold green]Launching '{first.Name}'[/]...");
-
-                var startInfo = new ProcessStartInfo
+                if (first != null)
                 {
-                    FileName = first.Url,
-                    UseShellExecute = true
-                };
+                    AnsiConsole.MarkupLine($"[bold green]Launching '{first.Name}'[/]...");
 
-                Process.Start(startInfo);
+                    var startInfo = new ProcessStartInfo
+                    {
+                        FileName = first.Url,
+                        UseShellExecute = true
+                    };
+
+                    Process.Start(startInfo);
+                }
             }
             else if (settings.Export)
             {
@@ -96,7 +73,7 @@ namespace TinyCity.Commands
                 AnsiConsole.MarkupLine($"[bold green]Exported search results to 'exported-bookmarks.md'[/].");
             }
 
-            return 0;
+            return Task.FromResult(0);
         }
 
         private List<BookmarkNode> Search(string searchTerm, bool searchUrls)
@@ -117,6 +94,31 @@ namespace TinyCity.Commands
                        .OrderBy(x => x.Name)
                        .ToList();
             }
+        }
+
+        public override Command CreateCommand(ExtraArgumentHandler extraArgumentHandler)
+        {
+            var command = new Command("search", "Search the bookmarks.");
+            command.AddAlias("q");
+
+            var settings = new SearchCommandSettings();
+            settings.AddOptionsToCommand(command);
+
+            command.SetHandler(async (SearchCommandSettings settings) =>
+            {
+                try
+                {
+                    extraArgumentHandler.SetShowExtraInfo(settings.Extra);
+                    await ExecuteAsync(settings);
+                }
+                catch (Exception ex)
+                {
+                    AnsiConsole.MarkupLine($"[red]{Markup.Escape(ex.Message)}[/]");
+                    AnsiConsole.MarkupLine(Markup.Escape(ex.ToString()));
+                }
+            }, settings);
+
+            return command;
         }
     }
 }

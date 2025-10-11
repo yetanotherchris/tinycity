@@ -12,7 +12,21 @@ The terminal output includes links that can be clicked, using the Spectre consol
 
 [![GitHub Release](https://img.shields.io/github/v/release/yetanotherchris/tiny-city?logo=github&sort=semver)](https://github.com/yetanotherchris/tiny-city/releases/latest/)
 
-You can download the latest version of tinycity using PowerShell or Bash:
+**Package managers**
+
+Scoop on Windows:
+```powershell
+scoop bucket add tinycity https://github.com/yetanotherchris/tinycity
+scoop install tinycity
+```
+
+Homebrew on macOS/Linux:
+```bash
+brew tap yetanotherchris/tinycity https://github.com/yetanotherchris/tinycity
+brew install tinycity
+```
+
+**Via your terminal**
 
 ```powershell
 Invoke-WebRequest -Uri "https://github.com/yetanotherchris/tiny-city/releases/latest/download/tinycity.exe" -OutFile "tinycity.exe"
@@ -45,7 +59,6 @@ OPTIONS:
 COMMANDS:
     search <query>    Search the bookmarks
     ls                List all bookmarks
-    update            Updates Tinycity, downloading the latest release from Github
     config            Configure bookmark sources
 ```
 
@@ -62,7 +75,7 @@ COMMANDS:
 ./tinycity config --html-bookmark-file "$($env:USERPROFILE)/bookmarks.html"
 ```
 
-If you clone the source using `git clone` (requires [.NET 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) or later):
+If you clone the source using `git clone` (requires [.NET 9](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) or later):
 
 ```
 dotnet run --

@@ -1,35 +1,22 @@
 ﻿using Spectre.Console;
-using Spectre.Console.Cli;
-using System.ComponentModel;
+using System.CommandLine;
 using System.Text;
 using TinyCity.BookmarkEngines;
 using TinyCity.Model;
+using TinyCity.Commands.Settings;
 
 namespace TinyCity.Commands
 {
-    public class ListCommandSettings : BaseSettings
+    public class ListCommandHandler : BaseCommandHandler<ListCommandSettings>
     {
-        [CommandOption("-e|--export")]
-        [Description("Exports the results as 'exported-bookmarks.md' to the same directory as tinycity.")]
-        [DefaultValue(false)]
-        public bool Export { get; set; }
+        private readonly List<BookmarkNode> _combinedBookmarks;
 
-        [CommandOption("--export-format")]
-        [Description("When exporting, sets the format of each link")]
-        [DefaultValue("- [{name}]({url}) ({urlhost})")]
-        public string ExportFormat { get; set; }
-    }
-
-    public class ListCommand : Command<ListCommandSettings>
-    {
-        private List<BookmarkNode> _combinedBookmarks;
-
-        public ListCommand(BookmarkAggregator bookmarkAggregator)
+        public ListCommandHandler(BookmarkAggregator bookmarkAggregator)
         {
             _combinedBookmarks = bookmarkAggregator.AllBookmarks;
         }
 
-        public override int Execute(CommandContext context, ListCommandSettings settings)
+        public override Task<int> ExecuteAsync(ListCommandSettings settings)
         {
             var exportStringBuilder = new StringBuilder();
             AnsiConsole.MarkupLine($"[bold turquoise2]{_combinedBookmarks.Count} unique bookmarks in total.[/]");
@@ -60,7 +47,32 @@ namespace TinyCity.Commands
                 AnsiConsole.MarkupLine($"[bold green]Exported to all bookmarks 'exported-bookmarks.md'[/].");
             }
 
-            return 0;
+            return Task.FromResult(0);
+        }
+
+        public override Command CreateCommand(ExtraArgumentHandler extraArgumentHandler)
+        {
+            var command = new Command("ls", "List all bookmarks.");
+            command.AddAlias("list");
+
+            var settingsBinder = new ListCommandSettings();
+            settingsBinder.AddOptionsToCommand(command);
+
+            command.SetHandler(async (ListCommandSettings settings) =>
+            {
+                try
+                {
+                    extraArgumentHandler.SetShowExtraInfo(settings.Extra);
+                    await ExecuteAsync(settings);
+                }
+                catch (Exception ex)
+                {
+                    AnsiConsole.MarkupLine($"[red]{Markup.Escape(ex.Message)}[/]");
+                    AnsiConsole.MarkupLine(Markup.Escape(ex.ToString()));
+                }
+            }, settingsBinder);
+
+            return command;
         }
     }
 }
