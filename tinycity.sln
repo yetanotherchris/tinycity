@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tiny-city", "tiny-city.csproj", "{0A2D3E74-B867-8B34-FE38-B3CD1F12D4E6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tinycity", "tinycity.csproj", "{0A2D3E74-B867-8B34-FE38-B3CD1F12D4E6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
