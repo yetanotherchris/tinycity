@@ -1,6 +1,8 @@
+using System.CommandLine.Binding;
+
 namespace TinyCity.Commands.Settings
 {
-    public class BaseSettings
+    public abstract class BaseSettings<T> : BinderBase<T> where T : BaseSettings<T>
     {
         public bool Extra { get; set; }
     }

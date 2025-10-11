@@ -2,7 +2,7 @@
 
 namespace TinyCity.Commands
 {
-    public abstract class BaseCommand<TSettings> where TSettings : BaseSettings, new()
+    public abstract class BaseCommand<TSettings>
     {
         protected readonly IServiceProvider _serviceProvider;
         

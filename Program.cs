@@ -25,10 +25,10 @@ namespace TinyCity
 
             var rootCommand = new RootCommand("A command line tool for searching bookmarks");
             
-            var searchCommand = SearchCommandSettings.CreateCommand(serviceProvider, interceptor, ex => capturedException = ex);
-            var listCommand = ListCommandSettings.CreateCommand(serviceProvider, interceptor, ex => capturedException = ex);
-            var updateCommand = UpdateCommandSettings.CreateCommand(serviceProvider, interceptor, ex => capturedException = ex);
-            var configCommand = ConfigCommandSettings.CreateCommand(serviceProvider, interceptor, ex => capturedException = ex);
+            var searchCommand = SearchCommand.CreateCommand(serviceProvider, interceptor, ex => capturedException = ex);
+            var listCommand = ListCommand.CreateCommand(serviceProvider, interceptor, ex => capturedException = ex);
+            var updateCommand = UpdateCommand.CreateCommand(serviceProvider, interceptor, ex => capturedException = ex);
+            var configCommand = ConfigCommand.CreateCommand(serviceProvider, interceptor, ex => capturedException = ex);
 
             rootCommand.AddCommand(searchCommand);
             rootCommand.AddCommand(listCommand);

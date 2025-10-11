@@ -1,4 +1,6 @@
-﻿using Spectre.Console;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Spectre.Console;
+using System.CommandLine;
 using TinyCity.Commands.Settings;
 
 namespace TinyCity.Commands
@@ -124,6 +126,30 @@ namespace TinyCity.Commands
                     }
                 }
             });
+        }
+
+        public static Command CreateCommand(IServiceProvider serviceProvider, ExtraInfoInterceptor interceptor, Action<Exception> onException)
+        {
+            var command = new Command("update", "Updates Tinycity, downloading the latest release from Github.");
+
+            var settingsBinder = new UpdateCommandSettings();
+            settingsBinder.ConfigureCommand(command);
+
+            command.SetHandler(async (UpdateCommandSettings settings) =>
+            {
+                try
+                {
+                    var updateCommandInstance = serviceProvider.GetRequiredService<UpdateCommand>();
+                    interceptor.SetShowExtraInfo(settings.Extra);
+                    await updateCommandInstance.ExecuteAsync(settings);
+                }
+                catch (Exception ex)
+                {
+                    onException(ex);
+                }
+            }, settingsBinder);
+
+            return command;
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using Spectre.Console;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Spectre.Console;
+using System.CommandLine;
 using System.Text;
 using TinyCity.BookmarkEngines;
 using TinyCity.Model;
@@ -6,7 +8,6 @@ using TinyCity.Commands.Settings;
 
 namespace TinyCity.Commands
 {
-
     public class ListCommand : BaseCommand<ListCommandSettings>
     {
         private List<BookmarkNode> _combinedBookmarks;
@@ -48,6 +49,31 @@ namespace TinyCity.Commands
             }
 
             return Task.FromResult(0);
+        }
+
+        public static Command CreateCommand(IServiceProvider serviceProvider, ExtraInfoInterceptor interceptor, Action<Exception> onException)
+        {
+            var command = new Command("ls", "List all bookmarks.");
+            command.AddAlias("list");
+
+            var settingsBinder = new ListCommandSettings();
+            settingsBinder.ConfigureCommand(command);
+
+            command.SetHandler(async (ListCommandSettings settings) =>
+            {
+                try
+                {
+                    var listCommandInstance = serviceProvider.GetRequiredService<ListCommand>();
+                    interceptor.SetShowExtraInfo(settings.Extra);
+                    await listCommandInstance.ExecuteAsync(settings);
+                }
+                catch (Exception ex)
+                {
+                    onException(ex);
+                }
+            }, settingsBinder);
+
+            return command;
         }
     }
 }

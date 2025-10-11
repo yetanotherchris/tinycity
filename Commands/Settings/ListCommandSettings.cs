@@ -5,71 +5,41 @@ using TinyCity.Commands.Settings;
 
 namespace TinyCity.Commands.Settings
 {
-    public class ListCommandSettings : BaseSettings
+    public class ListCommandSettings : BaseSettings<ListCommandSettings>
     {
         public bool Export { get; set; }
         public string ExportFormat { get; set; } = "- [{name}]({url}) ({urlhost})";
 
-        public static Command CreateCommand(IServiceProvider serviceProvider, ExtraInfoInterceptor interceptor, Action<Exception> onException)
+        private readonly Option<bool> _extraOption;
+        private readonly Option<bool> _exportOption;
+        private readonly Option<string> _exportFormatOption;
+
+        public ListCommandSettings()
         {
-            var command = new Command("ls", "List all bookmarks.");
-            command.AddAlias("list");
-
-            var extraOption = new Option<bool>("--extra", "Displays extra information including how long the application took to run.");
-            var exportOption = new Option<bool>(new[] { "-e", "--export" }, "Exports the results as 'exported-bookmarks.md' to the same directory as tinycity.");
-            var exportFormatOption = new Option<string>("--export-format", () => "- [{name}]({url}) ({urlhost})", "When exporting, sets the format of each link");
-
-            command.AddOption(extraOption);
-            command.AddOption(exportOption);
-            command.AddOption(exportFormatOption);
-
-            var settingsBinder = new ListCommandSettingsBinder(
-                extraOption,
-                exportOption,
-                exportFormatOption);
-
-            command.SetHandler(async (ListCommandSettings settings) =>
-            {
-                try
-                {
-                    var listCommandInstance = serviceProvider.GetRequiredService<ListCommand>();
-                    interceptor.SetShowExtraInfo(settings.Extra);
-                    await listCommandInstance.ExecuteAsync(settings);
-                }
-                catch (Exception ex)
-                {
-                    onException(ex);
-                }
-            }, settingsBinder);
-
-            return command;
+            _extraOption = new Option<bool>("--extra", "Displays extra information including how long the application took to run.");
+            _exportOption = new Option<bool>(new[] { "-e", "--export" }, "Exports the results as 'exported-bookmarks.md' to the same directory as tinycity.");
+            _exportFormatOption = new Option<string>("--export-format", () => "- [{name}]({url}) ({urlhost})", "When exporting, sets the format of each link");
         }
 
-        private class ListCommandSettingsBinder : BinderBase<ListCommandSettings>
+        public Option<bool> ExtraOption => _extraOption;
+        public Option<bool> ExportOption => _exportOption;
+        public Option<string> ExportFormatOption => _exportFormatOption;
+
+        protected override ListCommandSettings GetBoundValue(BindingContext bindingContext)
         {
-            private readonly Option<bool> _extraOption;
-            private readonly Option<bool> _exportOption;
-            private readonly Option<string> _exportFormatOption;
-
-            public ListCommandSettingsBinder(
-                Option<bool> extraOption,
-                Option<bool> exportOption,
-                Option<string> exportFormatOption)
+            return new ListCommandSettings
             {
-                _extraOption = extraOption;
-                _exportOption = exportOption;
-                _exportFormatOption = exportFormatOption;
-            }
+                Extra = bindingContext.ParseResult.GetValueForOption(_extraOption),
+                Export = bindingContext.ParseResult.GetValueForOption(_exportOption),
+                ExportFormat = bindingContext.ParseResult.GetValueForOption(_exportFormatOption) ?? "- [{name}]({url}) ({urlhost})"
+            };
+        }
 
-            protected override ListCommandSettings GetBoundValue(BindingContext bindingContext)
-            {
-                return new ListCommandSettings
-                {
-                    Extra = bindingContext.ParseResult.GetValueForOption(_extraOption),
-                    Export = bindingContext.ParseResult.GetValueForOption(_exportOption),
-                    ExportFormat = bindingContext.ParseResult.GetValueForOption(_exportFormatOption) ?? "- [{name}]({url}) ({urlhost})"
-                };
-            }
+        internal void ConfigureCommand(Command command)
+        {
+            command.AddOption(ExtraOption);
+            command.AddOption(ExportOption);
+            command.AddOption(ExportFormatOption);
         }
     }
 }

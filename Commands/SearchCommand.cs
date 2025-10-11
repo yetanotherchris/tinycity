@@ -1,5 +1,7 @@
-﻿using Spectre.Console;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Spectre.Console;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.Diagnostics;
 using System.Text;
 using TinyCity.BookmarkEngines;
@@ -92,6 +94,31 @@ namespace TinyCity.Commands
                        .OrderBy(x => x.Name)
                        .ToList();
             }
+        }
+
+        public static Command CreateCommand(IServiceProvider serviceProvider, ExtraInfoInterceptor interceptor, Action<Exception> onException)
+        {
+            var command = new Command("search", "Search the bookmarks.");
+            command.AddAlias("q");
+
+            var settings = new SearchCommandSettings();
+            settings.ConfigureCommand(command);
+
+            command.SetHandler(async (SearchCommandSettings settings) =>
+            {
+                try
+                {
+                    var searchCommandInstance = serviceProvider.GetRequiredService<SearchCommand>();
+                    interceptor.SetShowExtraInfo(settings.Extra);
+                    await searchCommandInstance.ExecuteAsync(settings);
+                }
+                catch (Exception ex)
+                {
+                    onException(ex);
+                }
+            }, settings);
+
+            return command;
         }
     }
 }

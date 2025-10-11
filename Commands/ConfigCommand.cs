@@ -1,4 +1,6 @@
-﻿using Spectre.Console;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Spectre.Console;
+using System.CommandLine;
 using TinyCity.BookmarkEngines;
 using TinyCity.Commands.Settings;
 
@@ -139,6 +141,30 @@ namespace TinyCity.Commands
             _tinyCitySettings.BrowserBookmarkFullPath = bookmarkPath;
             TinyCitySettings.Save(_tinyCitySettings);
             AnsiConsole.MarkupLine($"[bold green]Saved browser bookmark path: {bookmarkPath}[/]");
+        }
+
+        public static Command CreateCommand(IServiceProvider serviceProvider, ExtraInfoInterceptor interceptor, Action<Exception> onException)
+        {
+            var command = new Command("config", "Configure bookmark sources.");
+
+            var settingsBinder = new ConfigCommandSettings();
+            settingsBinder.ConfigureCommand(command);
+
+            command.SetHandler(async (ConfigCommandSettings settings) =>
+            {
+                try
+                {
+                    var configCommandInstance = serviceProvider.GetRequiredService<ConfigCommand>();
+                    interceptor.SetShowExtraInfo(settings.Extra);
+                    await configCommandInstance.ExecuteAsync(settings);
+                }
+                catch (Exception ex)
+                {
+                    onException(ex);
+                }
+            }, settingsBinder);
+
+            return command;
         }
     }
 }

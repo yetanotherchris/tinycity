@@ -5,50 +5,28 @@ using TinyCity.Commands.Settings;
 
 namespace TinyCity.Commands.Settings
 {
-    public class UpdateCommandSettings : BaseSettings
+    public class UpdateCommandSettings : BaseSettings<UpdateCommandSettings>
     {
-        public static Command CreateCommand(IServiceProvider serviceProvider, ExtraInfoInterceptor interceptor, Action<Exception> onException)
+        private readonly Option<bool> _extraOption;
+
+        public UpdateCommandSettings()
         {
-            var command = new Command("update", "Updates Tinycity, downloading the latest release from Github.");
-
-            var extraOption = new Option<bool>("--extra", "Displays extra information including how long the application took to run.");
-            command.AddOption(extraOption);
-
-            var settingsBinder = new UpdateCommandSettingsBinder(extraOption);
-
-            command.SetHandler(async (UpdateCommandSettings settings) =>
-            {
-                try
-                {
-                    var updateCommandInstance = serviceProvider.GetRequiredService<UpdateCommand>();
-                    interceptor.SetShowExtraInfo(settings.Extra);
-                    await updateCommandInstance.ExecuteAsync(settings);
-                }
-                catch (Exception ex)
-                {
-                    onException(ex);
-                }
-            }, settingsBinder);
-
-            return command;
+            _extraOption = new Option<bool>("--extra", "Displays extra information including how long the application took to run.");
         }
 
-        private class UpdateCommandSettingsBinder : BinderBase<UpdateCommandSettings>
+        public Option<bool> ExtraOption => _extraOption;
+
+        protected override UpdateCommandSettings GetBoundValue(BindingContext bindingContext)
         {
-            private readonly Option<bool> _extraOption;
-
-            public UpdateCommandSettingsBinder(Option<bool> extraOption)
+            return new UpdateCommandSettings
             {
-                _extraOption = extraOption;
-            }
+                Extra = bindingContext.ParseResult.GetValueForOption(_extraOption)
+            };
+        }
 
-            protected override UpdateCommandSettings GetBoundValue(BindingContext bindingContext)
-            {
-                return new UpdateCommandSettings
-                {
-                    Extra = bindingContext.ParseResult.GetValueForOption(_extraOption)
-                };
-            }
+        internal void ConfigureCommand(Command command)
+        {
+            command.AddOption(ExtraOption);
         }
     }
 }
