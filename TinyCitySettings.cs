@@ -8,8 +8,6 @@ namespace TinyCity
 
         public string ApplicationConfigDirectory { get; set; }
 
-        public string BrowserPath { get; set; } = BrowserKnownPaths.ChromePath;
-
         public string BrowserBookmarkFullPath { get; set; } = "";
 
         public string HtmlBookmarksFile { get; set; } = "";

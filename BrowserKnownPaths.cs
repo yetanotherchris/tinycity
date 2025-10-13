@@ -1,37 +1,99 @@
+using System.Runtime.InteropServices;
+
 namespace TinyCity
 {
     public class BrowserKnownPaths
     {
-        public static string ChromePath => Environment.OSVersion.Platform switch
+        public static string ChromeBookmarksPath
         {
-            PlatformID.Unix => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "google-chrome"),
-            PlatformID.MacOSX => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "Google", "Chrome"),
-            PlatformID.Win32NT => Path.Combine(Environment.GetEnvironmentVariable("LOCALAPPDATA"), "Google", "Chrome", "User Data"),
-            _ => throw new NotSupportedException("Unsupported platform.")
-        };
+            get
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    return Path.Combine(Environment.GetEnvironmentVariable("LOCALAPPDATA"), "Google", "Chrome", "User Data", "Default", "Bookmarks");
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "Google", "Chrome", "Default", "Bookmarks");
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "google-chrome", "Default", "Bookmarks");
+                }
+                else
+                {
+                    throw new NotSupportedException("Unsupported platform.");
+                }
+            }
+        }
 
-        public static string EdgePath => Environment.OSVersion.Platform switch
+        public static string EdgeBookmarksPath
         {
-            PlatformID.Unix => throw new NotImplementedException("Linux path not implemented for Edge."),
-            PlatformID.MacOSX => throw new NotImplementedException("MacOS path not implemented for Edge."),
-            PlatformID.Win32NT => Path.Combine(Environment.GetEnvironmentVariable("LOCALAPPDATA"), "Microsoft", "Edge", "User Data", "Default", "Bookmarks"),
-            _ => throw new NotSupportedException("Unsupported platform.")
-        };
+            get
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    return Path.Combine(Environment.GetEnvironmentVariable("LOCALAPPDATA"), "Microsoft", "Edge", "User Data", "Default", "Bookmarks");
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    throw new NotImplementedException("MacOS path not implemented for Edge.");
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    throw new NotImplementedException("Linux path not implemented for Edge.");
+                }
+                else
+                {
+                    throw new NotSupportedException("Unsupported platform.");
+                }
+            }
+        }
 
-        public static string BravePath => Environment.OSVersion.Platform switch
+        public static string BraveBookmarksPath
         {
-            PlatformID.Unix => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "BraveSoftware", "Brave-Browser", "Default", "Bookmarks"),
-            PlatformID.MacOSX => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "BraveSoftware", "Brave-Browser", "Default", "Bookmarks"),
-            PlatformID.Win32NT => Path.Combine(Environment.GetEnvironmentVariable("LOCALAPPDATA"), "BraveSoftware", "Brave-Browser", "User Data", "Default", "Bookmarks"),
-            _ => throw new NotSupportedException("Unsupported platform.")
-        };
+            get
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    return Path.Combine(Environment.GetEnvironmentVariable("LOCALAPPDATA"), "BraveSoftware", "Brave-Browser", "User Data", "Default", "Bookmarks");
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "BraveSoftware", "Brave-Browser", "Default", "Bookmarks");
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "BraveSoftware", "Brave-Browser", "Default", "Bookmarks");
+                }
+                else
+                {
+                    throw new NotSupportedException("Unsupported platform.");
+                }
+            }
+        }
 
-        public static string OperaPath => Environment.OSVersion.Platform switch
+        public static string OperaBookmarksPath
         {
-            PlatformID.Unix => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "opera"),
-            PlatformID.MacOSX => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "com.operasoftware.Opera", "Bookmarks"),
-            PlatformID.Win32NT => Path.Combine(Environment.GetEnvironmentVariable("APPDATA"), "Opera Software", "Opera Stable", "User Data", "Default", "Bookmarks"),
-            _ => throw new NotSupportedException("Unsupported platform.")
-        };
+            get
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    return Path.Combine(Environment.GetEnvironmentVariable("APPDATA"), "Opera Software", "Opera Stable", "User Data", "Default", "Bookmarks");
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "com.operasoftware.Opera", "Bookmarks");
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "opera");
+                }
+                else
+                {
+                    throw new NotSupportedException("Unsupported platform.");
+                }
+            }
+        }
     }
 }

@@ -46,11 +46,12 @@ namespace TinyCity.BookmarkEngines
                 return;
             }
 
+            string defaultPath = BrowserKnownPaths.ChromeBookmarksPath;
             string[] directoriesToTry =
             {
-                Path.Combine(BrowserKnownPaths.ChromePath, "Default", "Bookmarks"),
-                Path.Combine(BrowserKnownPaths.ChromePath, "Profile 1", "Bookmarks"),
-                Path.Combine(BrowserKnownPaths.ChromePath, "Profile 2", "Bookmarks")
+                defaultPath,
+                defaultPath.Replace("Default", "Profile 1"),
+                defaultPath.Replace("Default", "Profile 2")
             };
 
             foreach (string path in directoriesToTry)

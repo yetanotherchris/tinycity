@@ -55,7 +55,6 @@ namespace TinyCity.Commands
 
             AnsiConsole.MarkupLine($"[turquoise2]Configuration ('{TinyCitySettings.GetConfigFilePath()}'):[/]");
             AnsiConsole.MarkupLine($" • Home Directory: '{_tinyCitySettings.ApplicationConfigDirectory}'.");
-            AnsiConsole.MarkupLine($" • Browser path: '{_tinyCitySettings.BrowserPath}'.");
 
             string htmlFilePath = !string.IsNullOrEmpty(_tinyCitySettings.HtmlBookmarksFile) ? $"'{_tinyCitySettings.HtmlBookmarksFile}'" : "(none)";
             AnsiConsole.MarkupLine($" • HTML bookmark path: {htmlFilePath}.");
@@ -105,33 +104,27 @@ namespace TinyCity.Commands
         private void SetBrowser(string browser)
         {
             string browserLower = browser.ToLowerInvariant();
-            string browserPath;
             string bookmarkFullPath;
             
             switch (browserLower)
             {
                 case "chrome":
-                    browserPath = BrowserKnownPaths.ChromePath;
-                    bookmarkFullPath = Path.Combine(browserPath, "Default", "Bookmarks");
+                    bookmarkFullPath = BrowserKnownPaths.ChromeBookmarksPath;
                     break;
                 case "opera":
-                    bookmarkFullPath = BrowserKnownPaths.OperaPath;
-                    browserPath = Path.GetDirectoryName(bookmarkFullPath) ?? bookmarkFullPath;
+                    bookmarkFullPath = BrowserKnownPaths.OperaBookmarksPath;
                     break;
                 case "brave":
-                    bookmarkFullPath = BrowserKnownPaths.BravePath;
-                    browserPath = Path.GetDirectoryName(bookmarkFullPath) ?? bookmarkFullPath;
+                    bookmarkFullPath = BrowserKnownPaths.BraveBookmarksPath;
                     break;
                 case "edge":
-                    bookmarkFullPath = BrowserKnownPaths.EdgePath;
-                    browserPath = Path.GetDirectoryName(bookmarkFullPath) ?? bookmarkFullPath;
+                    bookmarkFullPath = BrowserKnownPaths.EdgeBookmarksPath;
                     break;
                 default:
                     AnsiConsole.MarkupLine($"[bold red]Invalid browser type '{browserLower}'. Valid values are: chrome, opera, brave, edge.[/]");
                     return;
             }
 
-            _tinyCitySettings.BrowserPath = browserPath;
             _tinyCitySettings.BrowserBookmarkFullPath = bookmarkFullPath;
             
             AnsiConsole.MarkupLine($"[bold green]Set browser bookmark path to {bookmarkFullPath}[/]");

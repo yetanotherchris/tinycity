@@ -1,8 +1,9 @@
 # tinycity
-A console app written in C# that lists and searches your bookmarks files, displaying them in the terminal and optionally launching them in your default browser. 
+Tinycity is terminal application written in C# that lists and searches your bookmarks files, displaying them in the terminal and optionally launching them in your default browser.  
+
 It doesn't manage your bookmarks (adding/editing/deleting), it just lists and searches through them.
 
-The terminal output includes links that can be clicked, using the Spectre console library. It supports the following bookmarks:
+The terminal output includes links that can be clicked. It supports the following bookmarks:
 
 - Chrome, Brave, Opera and Edge bookmarks (Chromium JSON bookmark format)
 - Markdown files with links.
@@ -28,20 +29,17 @@ brew install tinycity
 
 **Via your terminal**
 
+Powershell  
 ```powershell
 Invoke-WebRequest -Uri "https://github.com/yetanotherchris/tinycity/releases/latest/download/tinycity.exe" -OutFile "tinycity.exe"
 ```
+
+Bash  
 ```bash
 wget -O tinycity "https://github.com/yetanotherchris/tinycity/releases/latest/download/tinycity"
 ```
 ```bash
 curl -o tinycity -L "https://github.com/yetanotherchris/tinycity/releases/latest/download/tinycity"
-```
-
-Scoop.sh on Windows:
-```
-scoop bucket add tinycity https://github.com/yetanotherchris/tinycity/
-scoop install tinycity
 ```
 
 You can also download the latest release directly from the [Releases page](https://github.com/yetanotherchris/tinycity/releases).
