@@ -53,14 +53,15 @@ namespace TinyCity.Commands
 
             if (settings.Launch)
             {
-                var first = filteredBookmarks.FirstOrDefault();
-                if (first != null)
+                var firstItem = filteredBookmarks.FirstOrDefault();
+                if (firstItem != null)
                 {
-                    AnsiConsole.MarkupLine($"[bold green]Launching '{first.Name}'[/]...");
+                    string escapedName = Markup.Escape(firstItem.Name);
+                    AnsiConsole.MarkupLine($"[bold green]Launching '{escapedName}'[/]...");
 
                     var startInfo = new ProcessStartInfo
                     {
-                        FileName = first.Url,
+                        FileName = firstItem.Url,
                         UseShellExecute = true
                     };
 
