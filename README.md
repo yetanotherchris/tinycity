@@ -68,31 +68,32 @@ Commands:
 ### Examples
 ```
 # Configuration
-./tinycity config
-./tinycity config --add-source chrome
-./tinycity config --add-source more-bookmarks.md
-./tinycity config --remove-source brave
+tinycity config
+tinycity config --add-source chrome
+tinycity config --add-source chrome --directory /home/user/.var/app/io.github.ungoogled_software.ungoogled_chromium/config/chromium/Default
+tinycity config --add-source more-bookmarks.md
+tinycity config --remove-source brave
 
 # Search
-./tinycity search "google.com" --urls
-./tinycity q "gmail"
-./tinycity search "openrouter" --launch
+tinycity search "google.com" --urls
+tinycity q "gmail"
+tinycity search "openrouter" --launch
 
 # List
-./tinycity ls
-./tinycity ls --export
+tinycity ls
+tinycity ls --export
 
 # Export/Import
-./tinycity export --type local --source all --directory ~/backup
-./tinycity export --type remote --source chrome --bucket my-bucket --s3-endpoint https://s3.amazonaws.com
-./tinycity import --type local --target chrome --directory ~/backup
+tinycity export --type local --source all --directory ~/backup
+tinycity export --type remote --source chrome --bucket my-bucket --s3-endpoint https://s3.amazonaws.com
+tinycity import --type local --target chrome --directory ~/backup
 
 tinycity export --type remote --source all --s3-endpoint youraccount-id.r2.cloudflarestorage.com--s3-access-key key123 --s3-secret-key keyxyz --bucket yours3bucket --save-credentials
-
 tinycity import --type remote --source chrome --s3-endpoint s3.eu-central-003.backblazeb2.com --s3-access-key key123 --s3-secret-key keyxyz --bucket yours3bucket --save-credentials
 
 ```
 
+#### Local development
 If you clone the source using `git clone` (requires [.NET 10](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) or later):
 
 ```
