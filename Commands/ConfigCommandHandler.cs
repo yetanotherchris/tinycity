@@ -156,7 +156,7 @@ namespace TinyCity.Commands
 
             if (sourceLower == "chrome" || sourceLower == "brave" || sourceLower == "edge" || sourceLower == "opera")
             {
-                resolvedPath = ResolveBrowserPath(sourceLower);
+                resolvedPath = ResolveBrowserPath(sourceLower, null);
                 if (_tinyCitySettings.BrowserBookmarkPaths.Contains(resolvedPath))
                 {
                     _tinyCitySettings.BrowserBookmarkPaths.Remove(resolvedPath);
