@@ -22,7 +22,7 @@ namespace TinyCity.Commands
         {
             if (!string.IsNullOrEmpty(settings.AddSource))
             {
-                AddSource(settings.AddSource);
+                AddSource(settings.AddSource, settings.Directory);
             }
             else if (!string.IsNullOrEmpty(settings.RemoveSource))
             {
@@ -84,7 +84,7 @@ namespace TinyCity.Commands
             }
         }
 
-        private void AddSource(string source)
+        private void AddSource(string source, string? customDirectory)
         {
             string sourceLower = source.ToLowerInvariant();
             string resolvedPath;
@@ -92,7 +92,7 @@ namespace TinyCity.Commands
 
             if (sourceLower == "chrome" || sourceLower == "brave" || sourceLower == "edge" || sourceLower == "opera")
             {
-                resolvedPath = ResolveBrowserPath(sourceLower);
+                resolvedPath = ResolveBrowserPath(sourceLower, customDirectory);
                 sourceType = SourceType.Browser;
             }
             else
@@ -195,8 +195,14 @@ namespace TinyCity.Commands
             }
         }
 
-        private string ResolveBrowserPath(string browser)
+        private string ResolveBrowserPath(string browser, string? customDirectory)
         {
+            if (!string.IsNullOrEmpty(customDirectory))
+            {
+                // Use custom directory and append "Bookmarks" filename
+                return Path.Combine(customDirectory, "Bookmarks");
+            }
+
             return browser switch
             {
                 "chrome" => BrowserKnownPaths.ChromeBookmarksPath,
