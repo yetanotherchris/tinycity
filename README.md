@@ -73,7 +73,7 @@ COMMANDS:
 ./tinycity config --html-bookmark-file "$($env:USERPROFILE)/bookmarks.html"
 ```
 
-If you clone the source using `git clone` (requires [.NET 9](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) or later):
+If you clone the source using `git clone` (requires [.NET 10](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) or later):
 
 ```
 dotnet run --
