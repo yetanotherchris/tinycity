@@ -1,33 +1,33 @@
 class Tinycity < Formula
   desc "Ask any large language model from your terminal via OpenAI-compatible APIs"
   homepage "https://github.com/yetanotherchris/tinycity"
-  version "2.5.0"
+  version "3.0.0"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/yetanotherchris/tinycity/releases/download/v2.5.0/tinycity-v2.5.0-osx-arm64"
-      sha256 "750cbb24ed66f9e752c5c6e74920909f96bde445ea4f7d22a884920bfb24b995"
+      url "https://github.com/yetanotherchris/tinycity/releases/download/v3.0.0/tinycity-v3.0.0-osx-arm64"
+      sha256 "6cd4e17cfbcae50aab9577841a0f6f0fde34af9e6443660b98dab862406d414e"
     else
-      url "https://github.com/yetanotherchris/tinycity/releases/download/v2.5.0/tinycity-v2.5.0-osx-x64"
-      sha256 "6e4ad99a500573e8b39a1b6cc04c6bdc1b9025121e2364daaf075b18c794111e"
+      url "https://github.com/yetanotherchris/tinycity/releases/download/v3.0.0/tinycity-v3.0.0-osx-x64"
+      sha256 "fa087b8390bd8277a9faa5d37609aa1c1dbcbdf7fbbf6d392c91239fc5b1015c"
     end
   end
 
   on_linux do
-    url "https://github.com/yetanotherchris/tinycity/releases/download/v2.5.0/tinycity-v2.5.0-linux-x64"
-    sha256 "724e09a29a8d1147ab31d3a41247143cf146e934578500d0ff5bd29f2e626bdc"
+    url "https://github.com/yetanotherchris/tinycity/releases/download/v3.0.0/tinycity-v3.0.0-linux-x64"
+    sha256 "b477e3698a2df6994f6f2c8714e3c8bfb7129903c0abd0524a9adcd88d286786"
   end
 
   def install
     if OS.mac?
       if Hardware::CPU.arm?
-        bin.install "tinycity-v2.5.0-osx-arm64" => "tinycity"
+        bin.install "tinycity-v3.0.0-osx-arm64" => "tinycity"
       else
-        bin.install "tinycity-v2.5.0-osx-x64" => "tinycity"
+        bin.install "tinycity-v3.0.0-osx-x64" => "tinycity"
       end
     else
-      bin.install "tinycity-v2.5.0-linux-x64" => "tinycity"
+      bin.install "tinycity-v3.0.0-linux-x64" => "tinycity"
     end
   end
 
@@ -35,6 +35,7 @@ class Tinycity < Formula
     assert_match "USAGE:", shell_output("#{bin}/tinycity --help")
   end
 end
+
 
 
 
