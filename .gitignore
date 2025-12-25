@@ -398,3 +398,4 @@ FodyWeavers.xsd
 *.sln.iml
 
 exported-bookmarks.md
+.claude/settings.local.json
