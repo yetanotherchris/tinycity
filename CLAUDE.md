@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Tinycity is a .NET 10 CLI application that searches and displays bookmarks from various sources (Chrome/Brave/Edge/Opera bookmarks, Markdown files, HTML bookmark exports). It uses Native AOT compilation for cross-platform single-file executables.
+Tinycity is a .NET 10 CLI application that searches, imports, and exports bookmarks from various sources (Chrome/Brave/Edge/Opera bookmarks, Markdown files, HTML bookmark exports). It uses Native AOT compilation for cross-platform single-file executables.
 
 ## Build and Run Commands
 

@@ -1,7 +1,7 @@
 # tinycity
-Tinycity is terminal application written in C# that lists and searches your bookmarks files, displaying them in the terminal and optionally launching them in your default browser.  
+Tinycity is terminal application written in C# that lists, searches, imports, and exports your bookmarks files, displaying them in the terminal and optionally launching them in your default browser.
 
-It doesn't manage your bookmarks (adding/editing/deleting), it just lists and searches through them.
+It doesn't manage your bookmarks (adding/editing/deleting), it just lists, searches, imports, and exports them.
 
 The terminal output includes links that can be clicked. It supports the following bookmarks:
 
@@ -47,30 +47,50 @@ You can also download the latest release directly from the [Releases page](https
 ## Usage
 
 ```
-USAGE:
-    tinycity [OPTIONS] <COMMAND>
+Description:
+  A command line tool for searching, importing, and exporting bookmarks
 
-OPTIONS:
-    -h, --help       Prints help information
-    -v, --version    Prints version information
+Usage:
+  tinycity [command] [options]
 
-COMMANDS:
-    search <query>    Search the bookmarks
-    ls                List all bookmarks
-    config            Configure bookmark sources
+Options:
+  --version       Show version information
+  -?, -h, --help  Show help and usage information
+
+Commands:
+  q, search <query>  Search the bookmarks.
+  list, ls           List all bookmarks.
+  config             Configure bookmark sources.
+  export             Export bookmarks to S3 or local filesystem.
+  import             Import bookmarks from S3 or local filesystem.
 ```
 
 ### Examples
 ```
-./tinycity config # show the current config
-./tinycity config --help
-./tinycity ls
-./tinycity search "google.com" -urls #search using the url
-./tinycity q "gmail" # q is a shortcut for search
+# Configuration
+./tinycity config
+./tinycity config --add-source chrome
+./tinycity config --add-source more-bookmarks.md
+./tinycity config --remove-source brave
+
+# Search
+./tinycity search "google.com" --urls
+./tinycity q "gmail"
 ./tinycity search "openrouter" --launch
-./tinycity config -b brave
-./tinycity config -a more-bookmarks.md
-./tinycity config --html-bookmark-file "$($env:USERPROFILE)/bookmarks.html"
+
+# List
+./tinycity ls
+./tinycity ls --export
+
+# Export/Import
+./tinycity export --type local --source all --directory ~/backup
+./tinycity export --type remote --source chrome --bucket my-bucket --s3-endpoint https://s3.amazonaws.com
+./tinycity import --type local --target chrome --directory ~/backup
+
+tinycity export --type remote --source all --s3-endpoint youraccount-id.r2.cloudflarestorage.com--s3-access-key key123 --s3-secret-key keyxyz --bucket yours3bucket --save-credentials
+
+tinycity import --type remote --source chrome --s3-endpoint s3.eu-central-003.backblazeb2.com --s3-access-key key123 --s3-secret-key keyxyz --bucket yours3bucket --save-credentials
+
 ```
 
 If you clone the source using `git clone` (requires [.NET 10](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) or later):

@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Text;
 using TinyCity.BookmarkEngines;
 using TinyCity.Commands;
+using TinyCity.Services;
 
 namespace TinyCity
 {
@@ -21,19 +22,25 @@ namespace TinyCity
             var services = SetupIoC();
             var serviceProvider = services.BuildServiceProvider();
 
-            var rootCommand = new RootCommand("A command line tool for searching bookmarks");
+            var rootCommand = new RootCommand("A command line tool for searching, importing, and exporting bookmarks");
             
             var searchCommandInstance = serviceProvider.GetRequiredService<SearchCommandHandler>();
             var listCommandInstance = serviceProvider.GetRequiredService<ListCommandHandler>();
             var configCommandInstance = serviceProvider.GetRequiredService<ConfigCommandHandler>();
+            var exportCommandInstance = serviceProvider.GetRequiredService<ExportCommandHandler>();
+            var importCommandInstance = serviceProvider.GetRequiredService<ImportCommandHandler>();
 
             var searchCommand = searchCommandInstance.CreateCommand(extraArgHandler);
             var listCommand = listCommandInstance.CreateCommand(extraArgHandler);
             var configCommand = configCommandInstance.CreateCommand(extraArgHandler);
+            var exportCommand = exportCommandInstance.CreateCommand(extraArgHandler);
+            var importCommand = importCommandInstance.CreateCommand(extraArgHandler);
 
             rootCommand.AddCommand(searchCommand);
             rootCommand.AddCommand(listCommand);
             rootCommand.AddCommand(configCommand);
+            rootCommand.AddCommand(exportCommand);
+            rootCommand.AddCommand(importCommand);
 
             var commandLineBuilder = new CommandLineBuilder(rootCommand)
                 .UseVersionOption()
@@ -64,6 +71,10 @@ namespace TinyCity
             services.AddSingleton<ConfigCommandHandler>();
             services.AddSingleton<SearchCommandHandler>();
             services.AddSingleton<ListCommandHandler>();
+            services.AddSingleton<FileBackupService>();
+            services.AddSingleton<BookmarkImporter>();
+            services.AddSingleton<ExportCommandHandler>();
+            services.AddSingleton<ImportCommandHandler>();
 
             return services;
         }

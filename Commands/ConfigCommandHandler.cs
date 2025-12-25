@@ -20,31 +20,19 @@ namespace TinyCity.Commands
 
         public override Task<int> ExecuteAsync(ConfigCommandSettings settings)
         {
-            if (!string.IsNullOrEmpty(settings.AddMarkdownFile))
+            if (!string.IsNullOrEmpty(settings.AddSource))
             {
-                AddMarkdownFile(settings.AddMarkdownFile);
+                AddSource(settings.AddSource);
             }
-            else if (!string.IsNullOrEmpty(settings.RemoveMarkdownFile))
+            else if (!string.IsNullOrEmpty(settings.RemoveSource))
             {
-                RemoveMarkdownFile(settings.RemoveMarkdownFile);
-            }
-            else if (!string.IsNullOrEmpty(settings.Browser))
-            {
-                SetBrowser(settings.Browser);
-            }
-            else if (!string.IsNullOrEmpty(settings.HtmlBookmarkFile))
-            {
-                SetHtmlBookmarkFile(settings.HtmlBookmarkFile);
-            }
-            else if (!string.IsNullOrEmpty(settings.BrowserBookmarkPath))
-            {
-                SetBrowserBookmarkPath(settings.BrowserBookmarkPath);
+                RemoveSource(settings.RemoveSource);
             }
             else
             {
                 ShowConfiguration();
             }
-            
+
             return Task.FromResult(0);
         }
 
@@ -56,8 +44,18 @@ namespace TinyCity.Commands
             AnsiConsole.MarkupLine($"[turquoise2]Configuration ('{TinyCitySettings.GetConfigFilePath()}'):[/]");
             AnsiConsole.MarkupLine($" • Home Directory: '{_tinyCitySettings.ApplicationConfigDirectory}'.");
 
-            string htmlFilePath = !string.IsNullOrEmpty(_tinyCitySettings.HtmlBookmarksFile) ? $"'{_tinyCitySettings.HtmlBookmarksFile}'" : "(none)";
-            AnsiConsole.MarkupLine($" • HTML bookmark path: {htmlFilePath}.");
+            if (_tinyCitySettings.BrowserBookmarkPaths.Count > 0)
+            {
+                AnsiConsole.MarkupLine($" • Browser Bookmarks:");
+                foreach (var file in _tinyCitySettings.BrowserBookmarkPaths)
+                {
+                    AnsiConsole.MarkupLine($"   • '{file}'");
+                }
+            }
+            else
+            {
+                AnsiConsole.MarkupLine($" • Browser Bookmarks: (none)");
+            }
 
             if (_tinyCitySettings.MarkdownFiles.Count > 0)
             {
@@ -71,78 +69,175 @@ namespace TinyCity.Commands
             {
                 AnsiConsole.MarkupLine($" • Markdown Files: (none)");
             }
-        }
 
-        private void AddMarkdownFile(string markdownFile)
-        {
-            if (!_tinyCitySettings.MarkdownFiles.Contains(markdownFile))
+            if (_tinyCitySettings.HtmlBookmarksFiles.Count > 0)
             {
-                _tinyCitySettings.MarkdownFiles.Add(markdownFile);
-                TinyCitySettings.Save(_tinyCitySettings);
-                AnsiConsole.MarkupLine($"[bold green]Added markdown file: {markdownFile}[/]");
+                AnsiConsole.MarkupLine($" • HTML Bookmark Files:");
+                foreach (var file in _tinyCitySettings.HtmlBookmarksFiles)
+                {
+                    AnsiConsole.MarkupLine($"   • '{file}'");
+                }
             }
             else
             {
-                AnsiConsole.MarkupLine($"[bold red]Markdown file '{markdownFile}' already exists.[/]");
+                AnsiConsole.MarkupLine($" • HTML Bookmark Files: (none)");
             }
         }
 
-        private void RemoveMarkdownFile(string markdownFile)
+        private void AddSource(string source)
         {
-            if (_tinyCitySettings.MarkdownFiles.Contains(markdownFile))
+            string sourceLower = source.ToLowerInvariant();
+            string resolvedPath;
+            SourceType sourceType;
+
+            if (sourceLower == "chrome" || sourceLower == "brave" || sourceLower == "edge" || sourceLower == "opera")
             {
-                _tinyCitySettings.MarkdownFiles.Remove(markdownFile);
-                TinyCitySettings.Save(_tinyCitySettings);
-                AnsiConsole.MarkupLine($"[bold green]Removed markdown file: {markdownFile}[/]");
+                resolvedPath = ResolveBrowserPath(sourceLower);
+                sourceType = SourceType.Browser;
             }
             else
             {
-                AnsiConsole.MarkupLine($"[bold yellow]Markdown file '{markdownFile}' wasn't found in the configuration.[/]");
+                resolvedPath = source;
+                sourceType = InferSourceType(source);
             }
-        }
 
-        private void SetBrowser(string browser)
-        {
-            string browserLower = browser.ToLowerInvariant();
-            string bookmarkFullPath;
-            
-            switch (browserLower)
+            switch (sourceType)
             {
-                case "chrome":
-                    bookmarkFullPath = BrowserKnownPaths.ChromeBookmarksPath;
+                case SourceType.Browser:
+                    if (!_tinyCitySettings.BrowserBookmarkPaths.Contains(resolvedPath))
+                    {
+                        _tinyCitySettings.BrowserBookmarkPaths.Add(resolvedPath);
+                        TinyCitySettings.Save(_tinyCitySettings);
+                        AnsiConsole.MarkupLine($"[bold green]Added browser bookmark source: {resolvedPath}[/]");
+                    }
+                    else
+                    {
+                        AnsiConsole.MarkupLine($"[bold red]Browser bookmark source '{resolvedPath}' already exists.[/]");
+                    }
                     break;
-                case "opera":
-                    bookmarkFullPath = BrowserKnownPaths.OperaBookmarksPath;
+
+                case SourceType.Markdown:
+                    if (!_tinyCitySettings.MarkdownFiles.Contains(resolvedPath))
+                    {
+                        _tinyCitySettings.MarkdownFiles.Add(resolvedPath);
+                        TinyCitySettings.Save(_tinyCitySettings);
+                        AnsiConsole.MarkupLine($"[bold green]Added markdown file: {resolvedPath}[/]");
+                    }
+                    else
+                    {
+                        AnsiConsole.MarkupLine($"[bold red]Markdown file '{resolvedPath}' already exists.[/]");
+                    }
                     break;
-                case "brave":
-                    bookmarkFullPath = BrowserKnownPaths.BraveBookmarksPath;
+
+                case SourceType.Html:
+                    if (!_tinyCitySettings.HtmlBookmarksFiles.Contains(resolvedPath))
+                    {
+                        _tinyCitySettings.HtmlBookmarksFiles.Add(resolvedPath);
+                        TinyCitySettings.Save(_tinyCitySettings);
+                        AnsiConsole.MarkupLine($"[bold green]Added HTML bookmark file: {resolvedPath}[/]");
+                    }
+                    else
+                    {
+                        AnsiConsole.MarkupLine($"[bold red]HTML bookmark file '{resolvedPath}' already exists.[/]");
+                    }
                     break;
-                case "edge":
-                    bookmarkFullPath = BrowserKnownPaths.EdgeBookmarksPath;
+
+                case SourceType.Unknown:
+                    AnsiConsole.MarkupLine($"[bold red]Unable to determine source type for '{source}'. Supported types: browser names (chrome, brave, edge, opera), .md files, .html files, or browser bookmark files.[/]");
                     break;
-                default:
-                    AnsiConsole.MarkupLine($"[bold red]Invalid browser type '{browserLower}'. Valid values are: chrome, opera, brave, edge.[/]");
-                    return;
+            }
+        }
+
+        private void RemoveSource(string source)
+        {
+            string sourceLower = source.ToLowerInvariant();
+            string resolvedPath;
+            bool removed = false;
+
+            if (sourceLower == "chrome" || sourceLower == "brave" || sourceLower == "edge" || sourceLower == "opera")
+            {
+                resolvedPath = ResolveBrowserPath(sourceLower);
+                if (_tinyCitySettings.BrowserBookmarkPaths.Contains(resolvedPath))
+                {
+                    _tinyCitySettings.BrowserBookmarkPaths.Remove(resolvedPath);
+                    removed = true;
+                }
+            }
+            else
+            {
+                resolvedPath = source;
+
+                if (_tinyCitySettings.BrowserBookmarkPaths.Contains(resolvedPath))
+                {
+                    _tinyCitySettings.BrowserBookmarkPaths.Remove(resolvedPath);
+                    removed = true;
+                }
+                else if (_tinyCitySettings.MarkdownFiles.Contains(resolvedPath))
+                {
+                    _tinyCitySettings.MarkdownFiles.Remove(resolvedPath);
+                    removed = true;
+                }
+                else if (_tinyCitySettings.HtmlBookmarksFiles.Contains(resolvedPath))
+                {
+                    _tinyCitySettings.HtmlBookmarksFiles.Remove(resolvedPath);
+                    removed = true;
+                }
             }
 
-            _tinyCitySettings.BrowserBookmarkFullPath = bookmarkFullPath;
-            
-            AnsiConsole.MarkupLine($"[bold green]Set browser bookmark path to {bookmarkFullPath}[/]");
-            TinyCitySettings.Save(_tinyCitySettings);
+            if (removed)
+            {
+                TinyCitySettings.Save(_tinyCitySettings);
+                AnsiConsole.MarkupLine($"[bold green]Removed source: {resolvedPath}[/]");
+            }
+            else
+            {
+                AnsiConsole.MarkupLine($"[bold yellow]Source '{source}' not found in configuration.[/]");
+            }
         }
 
-        private void SetHtmlBookmarkFile(string htmlBookmarkFile)
+        private string ResolveBrowserPath(string browser)
         {
-            _tinyCitySettings.HtmlBookmarksFile = htmlBookmarkFile;
-            TinyCitySettings.Save(_tinyCitySettings);
-            AnsiConsole.MarkupLine($"[bold green]Added HTML bookmark file: {htmlBookmarkFile}[/]");
+            return browser switch
+            {
+                "chrome" => BrowserKnownPaths.ChromeBookmarksPath,
+                "opera" => BrowserKnownPaths.OperaBookmarksPath,
+                "brave" => BrowserKnownPaths.BraveBookmarksPath,
+                "edge" => BrowserKnownPaths.EdgeBookmarksPath,
+                _ => throw new ArgumentException($"Unknown browser type: {browser}")
+            };
         }
 
-        private void SetBrowserBookmarkPath(string bookmarkPath)
+        private SourceType InferSourceType(string path)
         {
-            _tinyCitySettings.BrowserBookmarkFullPath = bookmarkPath;
-            TinyCitySettings.Save(_tinyCitySettings);
-            AnsiConsole.MarkupLine($"[bold green]Saved browser bookmark path: {bookmarkPath}[/]");
+            string extension = Path.GetExtension(path).ToLowerInvariant();
+            string filename = Path.GetFileName(path);
+
+            if (extension == ".md")
+            {
+                return SourceType.Markdown;
+            }
+            else if (extension == ".html" || extension == ".htm")
+            {
+                return SourceType.Html;
+            }
+            else if (filename.Equals("Bookmarks", StringComparison.OrdinalIgnoreCase) ||
+                     path.Contains("Chrome", StringComparison.OrdinalIgnoreCase) ||
+                     path.Contains("Brave", StringComparison.OrdinalIgnoreCase) ||
+                     path.Contains("Edge", StringComparison.OrdinalIgnoreCase) ||
+                     path.Contains("Opera", StringComparison.OrdinalIgnoreCase))
+            {
+                return SourceType.Browser;
+            }
+
+            return SourceType.Unknown;
+        }
+
+        private enum SourceType
+        {
+            Browser,
+            Markdown,
+            Html,
+            Unknown
         }
 
         public override Command CreateCommand(ExtraArgumentHandler extraArgumentHandler)

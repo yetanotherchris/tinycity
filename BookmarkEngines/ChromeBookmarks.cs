@@ -11,63 +11,57 @@ namespace TinyCity.BookmarkEngines
 
         public ChromeBookmarks(TinyCitySettings settings)
         {
-            EnsureBookmarksPath(settings);
-            if (string.IsNullOrEmpty(settings.BrowserBookmarkFullPath))
+            FlattenedBookmarks = new List<BookmarkNode>();
+
+            if (settings.BrowserBookmarkPaths.Count == 0)
             {
+                _log = $" {Emoji.Known.Warning} Browser bookmarks: No browser bookmark sources configured.";
                 return;
             }
 
-            string json = File.ReadAllText(settings.BrowserBookmarkFullPath);           
-            var bookmarks = JsonSerializer.Deserialize(json, TinyCityJsonContext.Default.BookmarksFile);
-
-            FlattenedBookmarks = new List<BookmarkNode>();
-            if (bookmarks != null)
+            int totalBookmarksLoaded = 0;
+            foreach (var bookmarkPath in settings.BrowserBookmarkPaths)
             {
-                var bookmarkBarNodes = FlattenNodes(bookmarks.Roots.BookmarkBar);
-                var otherNodes = FlattenNodes(bookmarks.Roots.Other);
-                var syncedNodes = FlattenNodes(bookmarks.Roots.Synced);
+                if (!File.Exists(bookmarkPath))
+                {
+                    _log += $" {Emoji.Known.Warning} Browser bookmarks: File not found '{bookmarkPath}'.\n";
+                    continue;
+                }
 
-                FlattenedBookmarks = [.. bookmarkBarNodes, .. otherNodes, .. syncedNodes];
+                try
+                {
+                    string json = File.ReadAllText(bookmarkPath);
+                    var bookmarks = JsonSerializer.Deserialize(json, TinyCityJsonContext.Default.BookmarksFile);
+
+                    if (bookmarks != null)
+                    {
+                        var bookmarkBarNodes = FlattenNodes(bookmarks.Roots.BookmarkBar);
+                        var otherNodes = FlattenNodes(bookmarks.Roots.Other);
+                        var syncedNodes = FlattenNodes(bookmarks.Roots.Synced);
+
+                        var pathBookmarks = new List<BookmarkNode>();
+                        pathBookmarks = [.. bookmarkBarNodes, .. otherNodes, .. syncedNodes];
+
+                        FlattenedBookmarks.AddRange(pathBookmarks);
+                        totalBookmarksLoaded += pathBookmarks.Count;
+                        _log += $" {Emoji.Known.CheckMarkButton} Browser bookmarks: Loaded {pathBookmarks.Count} bookmarks from '{bookmarkPath}'.\n";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _log += $" {Emoji.Known.Warning} Browser bookmarks: Error loading '{bookmarkPath}': {ex.Message}\n";
+                }
             }
 
-            _log = $" {Emoji.Known.CheckMarkButton} Browser bookmarks: Loaded {FlattenedBookmarks.Count} bookmarks from '{settings.BrowserBookmarkFullPath}'.";
+            if (totalBookmarksLoaded == 0 && settings.BrowserBookmarkPaths.Count > 0)
+            {
+                _log += $" {Emoji.Known.Warning} Browser bookmarks: No bookmarks loaded from {settings.BrowserBookmarkPaths.Count} configured source(s).";
+            }
         }
 
         public string GetLog()
         {
-            return _log;
-        }
-
-        private void EnsureBookmarksPath(TinyCitySettings settings)
-        {
-            if (!string.IsNullOrEmpty(settings.BrowserBookmarkFullPath))
-            {
-                _log = $" {Emoji.Known.CheckMarkButton} Browser bookmarks: Using '{settings.BrowserBookmarkFullPath}'.";
-                return;
-            }
-
-            string defaultPath = BrowserKnownPaths.ChromeBookmarksPath;
-            string[] directoriesToTry =
-            {
-                defaultPath,
-                defaultPath.Replace("Default", "Profile 1"),
-                defaultPath.Replace("Default", "Profile 2")
-            };
-
-            foreach (string path in directoriesToTry)
-            {
-                if (Path.Exists(path))
-                {
-                    _log += $"• Browser bookmarks: Found '{path}'.\n";
-                    settings.BrowserBookmarkFullPath = path;
-                    TinyCitySettings.Save(settings);
-                    return;
-                }
-
-                _log += $" {Emoji.Known.Warning} Browser bookmarks: Couldn't find '{path}'.\n";
-            }
-
-            _log += $" {Emoji.Known.Warning} Browser bookmarks: couldn't find a Browser bookmarks path, skipping.";
+            return _log.TrimEnd('\n');
         }
 
         static List<BookmarkNode> FlattenNodes(BookmarkNode bookmarkNode)

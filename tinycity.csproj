@@ -9,7 +9,7 @@
 		<SelfContained>true</SelfContained>
 		<PackageId>tinycity</PackageId>
 		<Authors>C.Small</Authors>
-		<Description>A command line tool for searching bookmarks</Description>
+		<Description>A command line tool for searching, importing, and exporting bookmarks</Description>
 		<AssemblyName>tinycity</AssemblyName>
 
 		<!-- AOT -->
@@ -28,6 +28,7 @@
 		</PackageReference>
 		<PackageReference Include="markdig" Version="0.40.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
+		<PackageReference Include="Minio" Version="6.0.3" />
 		<PackageReference Include="Spectre.Console" Version="0.50.0" />
 		<PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
 	</ItemGroup>

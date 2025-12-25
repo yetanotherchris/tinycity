@@ -15,30 +15,48 @@ namespace TinyCity.BookmarkEngines
     public class HtmlBookmarks
     {
         public List<BookmarkNode> Bookmarks { get; set; } = new List<BookmarkNode>();
-        private string _log;
+        private string _log = "";
 
         public HtmlBookmarks(TinyCitySettings settings)
         {
-            string htmlFilePath = settings.HtmlBookmarksFile;
-            if (string.IsNullOrEmpty(htmlFilePath))
+            if (settings.HtmlBookmarksFiles.Count == 0)
             {
-                _log = $" {Emoji.Known.Prohibited} HTML bookmarks: no file specified in the settings.";
-                return;
-            }
-            else if (!File.Exists(htmlFilePath))
-            {
-                _log = $" {Emoji.Known.Warning} HTML bookmarks: couldn't find '{htmlFilePath}' so skipping.";
+                _log = $" {Emoji.Known.Prohibited} HTML bookmarks: No HTML bookmark files configured.";
                 return;
             }
 
-            string html = File.ReadAllText(htmlFilePath);
-            var bookmarks = ParseHtmlFile(html).GetAwaiter().GetResult();
-            Bookmarks.AddRange(bookmarks);
+            int totalBookmarksLoaded = 0;
+            foreach (var htmlFilePath in settings.HtmlBookmarksFiles)
+            {
+                if (!File.Exists(htmlFilePath))
+                {
+                    _log += $" {Emoji.Known.Warning} HTML bookmarks: File not found '{htmlFilePath}'.\n";
+                    continue;
+                }
+
+                try
+                {
+                    string html = File.ReadAllText(htmlFilePath);
+                    var bookmarks = ParseHtmlFile(html).GetAwaiter().GetResult();
+                    Bookmarks.AddRange(bookmarks);
+                    totalBookmarksLoaded += bookmarks.Count;
+                    _log += $" {Emoji.Known.CheckMarkButton} HTML bookmarks: Loaded {bookmarks.Count} bookmarks from '{htmlFilePath}'.\n";
+                }
+                catch (Exception ex)
+                {
+                    _log += $" {Emoji.Known.Warning} HTML bookmarks: Error loading '{htmlFilePath}': {ex.Message}\n";
+                }
+            }
+
+            if (totalBookmarksLoaded == 0 && settings.HtmlBookmarksFiles.Count > 0)
+            {
+                _log += $" {Emoji.Known.Warning} HTML bookmarks: No bookmarks loaded from {settings.HtmlBookmarksFiles.Count} configured source(s).";
+            }
         }
 
         public string GetLog()
         {
-            return _log;
+            return _log.TrimEnd('\n');
         }
 
         private async Task<List<BookmarkNode>> ParseHtmlFile(string html)

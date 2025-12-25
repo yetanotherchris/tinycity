@@ -4,13 +4,23 @@ namespace TinyCity
 {
     public class TinyCitySettings
     {
+        public List<string> BrowserBookmarkPaths { get; set; } = new List<string>();
+
         public List<string> MarkdownFiles { get; set; } = new List<string>();
+
+        public List<string> HtmlBookmarksFiles { get; set; } = new List<string>();
 
         public string ApplicationConfigDirectory { get; set; }
 
-        public string BrowserBookmarkFullPath { get; set; } = "";
+        public string S3AccessKey { get; set; } = "";
 
-        public string HtmlBookmarksFile { get; set; } = "";
+        public string S3SecretKey { get; set; } = "";
+
+        public string S3Endpoint { get; set; } = "";
+
+        public string S3Bucket { get; set; } = "";
+
+        public string S3KeyPrefix { get; set; } = "";
 
         public static TinyCitySettings Load()
         {
