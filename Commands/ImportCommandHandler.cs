@@ -23,193 +23,36 @@ namespace TinyCity.Commands
 
         public override async Task<int> ExecuteAsync(ImportCommandSettings settings)
         {
-            if (string.IsNullOrEmpty(settings.Type))
-            {
-                AnsiConsole.MarkupLine("[red]Option --type is required. Valid values: remote, local[/]");
-                return 1;
-            }
-
             if (string.IsNullOrEmpty(settings.Target))
             {
                 AnsiConsole.MarkupLine("[red]Option --target is required. Valid values: chrome, brave, edge, opera, markdown, html, all[/]");
                 return 1;
             }
 
-            string type = settings.Type.ToLowerInvariant();
-            string target = settings.Target.ToLowerInvariant();
-
-            if (type != "remote" && type != "local")
+            if (string.IsNullOrEmpty(settings.Directory))
             {
-                AnsiConsole.MarkupLine($"[red]Invalid type '{settings.Type}'. Valid values: remote, local[/]");
+                AnsiConsole.MarkupLine("[red]Option --directory is required[/]");
                 return 1;
             }
 
-            if (type == "remote")
+            if (!Directory.Exists(settings.Directory))
             {
-                var s3Settings = ResolveS3Settings(settings);
-                ValidateS3Settings(s3Settings);
+                AnsiConsole.MarkupLine($"[red]Local directory '{settings.Directory}' not found[/]");
+                return 1;
+            }
 
-                if (target == "all")
-                {
-                    await ImportAllFromS3(s3Settings);
-                }
-                else
-                {
-                    await ImportSingleFromS3(target, s3Settings);
-                }
+            string target = settings.Target.ToLowerInvariant();
+
+            if (target == "all")
+            {
+                await ImportAllFromLocal(settings.Directory);
             }
             else
             {
-                if (string.IsNullOrEmpty(settings.Directory))
-                {
-                    AnsiConsole.MarkupLine("[red]Option --directory is required for local import[/]");
-                    return 1;
-                }
-
-                if (!Directory.Exists(settings.Directory))
-                {
-                    AnsiConsole.MarkupLine($"[red]Local directory '{settings.Directory}' not found[/]");
-                    return 1;
-                }
-
-                if (target == "all")
-                {
-                    await ImportAllFromLocal(settings.Directory);
-                }
-                else
-                {
-                    await ImportSingleFromLocal(target, settings.Directory);
-                }
+                await ImportSingleFromLocal(target, settings.Directory);
             }
 
             return 0;
-        }
-
-        private S3Settings ResolveS3Settings(ImportCommandSettings settings)
-        {
-            return new S3Settings
-            {
-                Endpoint = settings.S3Endpoint ?? _settings.S3Endpoint,
-                AccessKey = settings.S3AccessKey ?? _settings.S3AccessKey,
-                SecretKey = settings.S3SecretKey ?? _settings.S3SecretKey,
-                Bucket = settings.Bucket ?? _settings.S3Bucket,
-                KeyPrefix = _settings.S3KeyPrefix
-            };
-        }
-
-        private void ValidateS3Settings(S3Settings s3)
-        {
-            if (string.IsNullOrEmpty(s3.Endpoint))
-                throw new ArgumentException("S3 endpoint not configured. Use --s3-endpoint or configure it.");
-            if (string.IsNullOrEmpty(s3.AccessKey))
-                throw new ArgumentException("S3 access key not configured. Use --s3-access-key or configure it.");
-            if (string.IsNullOrEmpty(s3.SecretKey))
-                throw new ArgumentException("S3 secret key not configured. Use --s3-secret-key or configure it.");
-            if (string.IsNullOrEmpty(s3.Bucket))
-                throw new ArgumentException("S3 bucket not configured. Use --bucket or configure it.");
-        }
-
-        private async Task ImportAllFromS3(S3Settings s3Settings)
-        {
-            var importedFiles = new List<string>();
-            var skippedFiles = new List<string>();
-
-            var filesToTry = new[]
-            {
-                ("chrome.json", "chrome"),
-                ("brave.json", "brave"),
-                ("edge.json", "edge"),
-                ("opera.json", "opera"),
-                ("bookmarks.md", "markdown"),
-                ("bookmarks.html", "html")
-            };
-
-            foreach (var (filename, targetType) in filesToTry)
-            {
-                try
-                {
-                    string? targetPath = GetTargetPath(targetType);
-                    if (string.IsNullOrEmpty(targetPath))
-                    {
-                        skippedFiles.Add($"{filename} (not configured)");
-                        continue;
-                    }
-
-                    await ImportFileFromS3(filename, targetPath, targetType, s3Settings);
-                    importedFiles.Add(filename);
-                }
-                catch (Exception ex)
-                {
-                    skippedFiles.Add($"{filename} ({ex.Message})");
-                }
-            }
-
-            if (importedFiles.Count > 0)
-            {
-                AnsiConsole.MarkupLine($"[bold green]Imported {importedFiles.Count} file(s): {string.Join(", ", importedFiles)}[/]");
-            }
-
-            if (skippedFiles.Count > 0)
-            {
-                AnsiConsole.MarkupLine($"[yellow]Skipped {skippedFiles.Count} file(s): {string.Join(", ", skippedFiles)}[/]");
-            }
-
-            if (importedFiles.Count == 0)
-            {
-                AnsiConsole.MarkupLine("[yellow]No files were imported[/]");
-            }
-        }
-
-        private async Task ImportSingleFromS3(string target, S3Settings s3Settings)
-        {
-            string? targetPath = GetTargetPath(target);
-            if (string.IsNullOrEmpty(targetPath))
-            {
-                throw new InvalidOperationException($"Cannot import to {target}: not configured. Run 'tinycity config' to configure.");
-            }
-
-            string filename = GetFilenameForTarget(target);
-            await ImportFileFromS3(filename, targetPath, target, s3Settings);
-
-            AnsiConsole.MarkupLine($"[bold green]Imported {filename} to {targetPath}[/]");
-            AnsiConsole.MarkupLine($"[dim]Backup created at: {targetPath}.bak[/]");
-        }
-
-        private async Task ImportFileFromS3(string filename, string targetPath, string targetType, S3Settings s3Settings)
-        {
-            string tempFilePath = Path.Combine(Path.GetTempPath(), filename);
-
-            try
-            {
-                var s3Service = new S3Service(s3Settings.Endpoint, s3Settings.AccessKey, s3Settings.SecretKey);
-                string objectKey = string.IsNullOrEmpty(s3Settings.KeyPrefix)
-                    ? filename
-                    : $"{s3Settings.KeyPrefix}/{filename}";
-
-                await s3Service.DownloadFileAsync(s3Settings.Bucket, objectKey, tempFilePath);
-
-                string content = await File.ReadAllTextAsync(tempFilePath);
-
-                if (targetType == "chrome" || targetType == "brave" || targetType == "edge" || targetType == "opera")
-                {
-                    await _importer.ImportFromChromiumJsonAsync(content, targetPath, _backup);
-                }
-                else if (targetType == "markdown")
-                {
-                    await _importer.ImportFromMarkdownAsync(content, targetPath, _backup);
-                }
-                else if (targetType == "html")
-                {
-                    await _importer.ImportFromHtmlAsync(content, targetPath, _backup);
-                }
-            }
-            finally
-            {
-                if (File.Exists(tempFilePath))
-                {
-                    File.Delete(tempFilePath);
-                }
-            }
         }
 
         private async Task ImportAllFromLocal(string directory)
@@ -364,7 +207,7 @@ namespace TinyCity.Commands
 
         public override Command CreateCommand(ExtraArgumentHandler extraArgumentHandler)
         {
-            var command = new Command("import", "Import bookmarks from S3 or local filesystem.");
+            var command = new Command("import", "Import bookmarks from local filesystem.");
 
             var settingsBinder = new ImportCommandSettings();
             settingsBinder.AddOptionsToCommand(command);
@@ -387,15 +230,6 @@ namespace TinyCity.Commands
             }, settingsBinder);
 
             return command;
-        }
-
-        private class S3Settings
-        {
-            public string Endpoint { get; set; } = "";
-            public string AccessKey { get; set; } = "";
-            public string SecretKey { get; set; } = "";
-            public string Bucket { get; set; } = "";
-            public string KeyPrefix { get; set; } = "";
         }
     }
 }

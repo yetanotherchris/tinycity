@@ -16,179 +16,35 @@ namespace TinyCity.Commands
 
         public override async Task<int> ExecuteAsync(ExportCommandSettings settings)
         {
-            if (string.IsNullOrEmpty(settings.Type))
-            {
-                AnsiConsole.MarkupLine("[red]Option --type is required. Valid values: remote, local[/]");
-                return 1;
-            }
-
             if (string.IsNullOrEmpty(settings.Source))
             {
                 AnsiConsole.MarkupLine("[red]Option --source is required. Valid values: chrome, brave, edge, opera, markdown, html, all[/]");
                 return 1;
             }
 
-            string type = settings.Type.ToLowerInvariant();
-            string source = settings.Source.ToLowerInvariant();
-
-            if (type != "remote" && type != "local")
+            if (string.IsNullOrEmpty(settings.Directory))
             {
-                AnsiConsole.MarkupLine($"[red]Invalid type '{settings.Type}'. Valid values: remote, local[/]");
+                AnsiConsole.MarkupLine("[red]Option --directory is required[/]");
                 return 1;
             }
 
-            if (type == "remote")
+            if (!Directory.Exists(settings.Directory))
             {
-                var s3Settings = ResolveS3Settings(settings);
-                ValidateS3Settings(s3Settings);
+                Directory.CreateDirectory(settings.Directory);
+            }
 
-                if (settings.SaveCredentials)
-                {
-                    SaveS3Credentials(s3Settings);
-                }
+            string source = settings.Source.ToLowerInvariant();
 
-                if (source == "all")
-                {
-                    await ExportAllToS3(s3Settings);
-                }
-                else
-                {
-                    await ExportSingleToS3(source, s3Settings);
-                }
+            if (source == "all")
+            {
+                await ExportAllToLocal(settings.Directory);
             }
             else
             {
-                if (string.IsNullOrEmpty(settings.Directory))
-                {
-                    AnsiConsole.MarkupLine("[red]Option --directory is required for local export[/]");
-                    return 1;
-                }
-
-                if (!Directory.Exists(settings.Directory))
-                {
-                    Directory.CreateDirectory(settings.Directory);
-                }
-
-                if (source == "all")
-                {
-                    await ExportAllToLocal(settings.Directory);
-                }
-                else
-                {
-                    await ExportSingleToLocal(source, settings.Directory);
-                }
+                await ExportSingleToLocal(source, settings.Directory);
             }
 
             return 0;
-        }
-
-        private S3Settings ResolveS3Settings(ExportCommandSettings settings)
-        {
-            return new S3Settings
-            {
-                Endpoint = settings.S3Endpoint ?? _settings.S3Endpoint,
-                AccessKey = settings.S3AccessKey ?? _settings.S3AccessKey,
-                SecretKey = settings.S3SecretKey ?? _settings.S3SecretKey,
-                Bucket = settings.Bucket ?? _settings.S3Bucket,
-                KeyPrefix = _settings.S3KeyPrefix
-            };
-        }
-
-        private void ValidateS3Settings(S3Settings s3)
-        {
-            if (string.IsNullOrEmpty(s3.Endpoint))
-                throw new ArgumentException("S3 endpoint not configured. Use --s3-endpoint or configure it.");
-            if (string.IsNullOrEmpty(s3.AccessKey))
-                throw new ArgumentException("S3 access key not configured. Use --s3-access-key or configure it.");
-            if (string.IsNullOrEmpty(s3.SecretKey))
-                throw new ArgumentException("S3 secret key not configured. Use --s3-secret-key or configure it.");
-            if (string.IsNullOrEmpty(s3.Bucket))
-                throw new ArgumentException("S3 bucket not configured. Use --bucket or configure it.");
-        }
-
-        private void SaveS3Credentials(S3Settings s3Settings)
-        {
-            _settings.S3Endpoint = s3Settings.Endpoint;
-            _settings.S3AccessKey = s3Settings.AccessKey;
-            _settings.S3SecretKey = s3Settings.SecretKey;
-            _settings.S3Bucket = s3Settings.Bucket;
-            TinyCitySettings.Save(_settings);
-
-            AnsiConsole.MarkupLine("[yellow]S3 credentials saved to config[/]");
-        }
-
-        private async Task ExportAllToS3(S3Settings s3Settings)
-        {
-            var exportedFiles = new List<string>();
-
-            foreach (var browserPath in _settings.BrowserBookmarkPaths)
-            {
-                if (File.Exists(browserPath))
-                {
-                    string browserType = GetBrowserTypeFromPath(browserPath);
-                    string filename = $"{browserType}.json";
-                    await ExportFileToS3(browserPath, filename, s3Settings);
-                    exportedFiles.Add(filename);
-                }
-            }
-
-            foreach (var mdFile in _settings.MarkdownFiles)
-            {
-                if (File.Exists(mdFile))
-                {
-                    string filename = Path.GetFileName(mdFile);
-                    await ExportFileToS3(mdFile, filename, s3Settings);
-                    exportedFiles.Add(filename);
-                }
-            }
-
-            foreach (var htmlFile in _settings.HtmlBookmarksFiles)
-            {
-                if (File.Exists(htmlFile))
-                {
-                    string filename = Path.GetFileName(htmlFile);
-                    await ExportFileToS3(htmlFile, filename, s3Settings);
-                    exportedFiles.Add(filename);
-                }
-            }
-
-            if (exportedFiles.Count == 0)
-            {
-                AnsiConsole.MarkupLine("[yellow]No bookmark files found to export[/]");
-            }
-            else
-            {
-                AnsiConsole.MarkupLine($"[bold green]Exported {exportedFiles.Count} file(s) to S3: {string.Join(", ", exportedFiles)}[/]");
-            }
-        }
-
-        private async Task ExportSingleToS3(string source, S3Settings s3Settings)
-        {
-            string? sourcePath = GetSourcePath(source);
-            if (string.IsNullOrEmpty(sourcePath))
-            {
-                throw new InvalidOperationException($"No {source} bookmark file configured. Run 'tinycity config' to configure.");
-            }
-
-            if (!File.Exists(sourcePath))
-            {
-                throw new FileNotFoundException($"Bookmark file not found: {sourcePath}");
-            }
-
-            string filename = GetFilenameForSource(source, sourcePath);
-            await ExportFileToS3(sourcePath, filename, s3Settings);
-
-            AnsiConsole.MarkupLine($"[bold green]Exported {filename} to S3 bucket '{s3Settings.Bucket}'[/]");
-        }
-
-        private async Task ExportFileToS3(string sourcePath, string filename, S3Settings s3Settings)
-        {
-            var s3Service = new S3Service(s3Settings.Endpoint, s3Settings.AccessKey, s3Settings.SecretKey);
-            string objectKey = string.IsNullOrEmpty(s3Settings.KeyPrefix)
-                ? filename
-                : $"{s3Settings.KeyPrefix}/{filename}";
-
-            await s3Service.UploadFileAsync(s3Settings.Bucket, objectKey, sourcePath);
         }
 
         private async Task ExportAllToLocal(string directory)
@@ -312,7 +168,7 @@ namespace TinyCity.Commands
 
         public override Command CreateCommand(ExtraArgumentHandler extraArgumentHandler)
         {
-            var command = new Command("export", "Export bookmarks to S3 or local filesystem.");
+            var command = new Command("export", "Export bookmarks to local filesystem.");
 
             var settingsBinder = new ExportCommandSettings();
             settingsBinder.AddOptionsToCommand(command);
@@ -335,15 +191,6 @@ namespace TinyCity.Commands
             }, settingsBinder);
 
             return command;
-        }
-
-        private class S3Settings
-        {
-            public string Endpoint { get; set; } = "";
-            public string AccessKey { get; set; } = "";
-            public string SecretKey { get; set; } = "";
-            public string Bucket { get; set; } = "";
-            public string KeyPrefix { get; set; } = "";
         }
     }
 }

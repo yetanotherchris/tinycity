@@ -12,16 +12,6 @@ namespace TinyCity
 
         public string ApplicationConfigDirectory { get; set; }
 
-        public string S3AccessKey { get; set; } = "";
-
-        public string S3SecretKey { get; set; } = "";
-
-        public string S3Endpoint { get; set; } = "";
-
-        public string S3Bucket { get; set; } = "";
-
-        public string S3KeyPrefix { get; set; } = "";
-
         public static TinyCitySettings Load()
         {
             var configFilePath = GetConfigFilePath();
