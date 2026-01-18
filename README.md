@@ -61,8 +61,8 @@ Commands:
   q, search <query>  Search the bookmarks.
   list, ls           List all bookmarks.
   config             Configure bookmark sources.
-  export             Export bookmarks to S3 or local filesystem.
-  import             Import bookmarks from S3 or local filesystem.
+  export             Export bookmarks to local filesystem.
+  import             Import bookmarks from local filesystem.
 ```
 
 ### Examples
@@ -84,12 +84,10 @@ tinycity ls
 tinycity ls --export
 
 # Export/Import
-tinycity export --type local --source all --directory ~/backup
-tinycity export --type remote --source chrome --bucket my-bucket --s3-endpoint https://s3.amazonaws.com
-tinycity import --type local --target chrome --directory ~/backup
-
-tinycity export --type remote --source all --s3-endpoint youraccount-id.r2.cloudflarestorage.com--s3-access-key key123 --s3-secret-key keyxyz --bucket yours3bucket --save-credentials
-tinycity import --type remote --source chrome --s3-endpoint s3.eu-central-003.backblazeb2.com --s3-access-key key123 --s3-secret-key keyxyz --bucket yours3bucket --save-credentials
+tinycity export --source all --directory ~/backup
+tinycity export --source chrome --directory ~/backup
+tinycity import --target chrome --directory ~/backup
+tinycity import --target all --directory ~/backup
 
 ```
 
