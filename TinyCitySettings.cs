@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Text.Json;
 
 namespace TinyCity
@@ -45,25 +46,23 @@ namespace TinyCity
 
         private static string GetApplicationDirectory()
         {
-            string homePath = "";
+            string homePath;
 
-            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                homePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                homePath = Path.Combine(homePath, ".config");
+                homePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             }
-            else if (Environment.OSVersion.Platform == PlatformID.MacOSX)
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                // todo
+                homePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support");
             }
-            else if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                homePath = Environment.GetEnvironmentVariable("LOCALAPPDATA");
+                homePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config");
             }
-
-            if (string.IsNullOrEmpty(homePath))
+            else
             {
-                throw new Exception("Unable to determine home directory.");
+                throw new NotSupportedException("Unsupported platform.");
             }
 
             string applicationPath = Path.Combine(homePath, "tinycity");
