@@ -100,5 +100,21 @@ tinycity import --target all --directory ~/backup
 - If the user says "import" or "restore", use `tinycity import`.
 - If results are empty, tell the user and suggest checking sources with `tinycity config`.
 - Do not guess or fabricate bookmark data — always run the command and return the real output.
-- Ensure the results you display match the tiny results, which should include the hyperlinks.
-  - For example searching for Google Drive bookmarks, the result would display the equivalent to this markdown: "[Google Drive](drive.google.com) (drive.google.com)"
+
+## Displaying results
+
+The raw CLI output contains ANSI colour codes and OSC 8 terminal hyperlinks. Strip those and render the results in plain markdown that matches the tinycity visual style:
+
+1. **Header line** — bold count and query, e.g. `**4 bookmark(s) found for 'google'.**`
+2. **Bullet list** — one entry per result in the format:
+   ```
+   - [Title](url) (domain)
+   ```
+   where `domain` is the hostname extracted from the URL (e.g. `drive.google.com`).
+
+Example output for `tinycity search "google drive"`:
+
+**2 bookmark(s) found for 'google drive'.**
+
+- [Google Drive](https://drive.google.com/drive/u/0/) (drive.google.com)
+- [Google Drive - Shared](https://drive.google.com/drive/shared-with-me) (drive.google.com)
