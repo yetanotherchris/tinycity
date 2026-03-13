@@ -30,6 +30,24 @@ namespace TinyCity.Commands
                 return Task.FromResult(0);
             }
 
+            if (settings.Plain)
+            {
+                Console.WriteLine($"{count} bookmark(s) found for '{settings.Query}'.");
+                foreach (var bookmark in filteredBookmarks)
+                {
+                    if (!string.IsNullOrEmpty(bookmark.Url))
+                    {
+                        string urlHost = new Uri(bookmark.Url).Host;
+                        string line = settings.ExportFormat
+                            .Replace("{name}", bookmark.Name)
+                            .Replace("{url}", bookmark.Url)
+                            .Replace("{urlhost}", urlHost);
+                        Console.WriteLine(line);
+                    }
+                }
+                return Task.FromResult(0);
+            }
+
             AnsiConsole.MarkupLine($"[bold turquoise2]{count} bookmark(s) found for '{settings.Query}'.[/]");
             foreach (var bookmark in filteredBookmarks)
             {
