@@ -19,6 +19,24 @@ namespace TinyCity.Commands
         public override Task<int> ExecuteAsync(ListCommandSettings settings)
         {
             var exportStringBuilder = new StringBuilder();
+            if (settings.Plain)
+            {
+                Console.WriteLine($"{_combinedBookmarks.Count} unique bookmarks in total.");
+                foreach (var bookmark in _combinedBookmarks.OrderBy(x => x.Name))
+                {
+                    if (!string.IsNullOrEmpty(bookmark.Url))
+                    {
+                        string urlHost = new Uri(bookmark.Url).Host;
+                        string line = settings.ExportFormat
+                            .Replace("{name}", bookmark.Name)
+                            .Replace("{url}", bookmark.Url)
+                            .Replace("{urlhost}", urlHost);
+                        Console.WriteLine(line);
+                    }
+                }
+                return Task.FromResult(0);
+            }
+
             AnsiConsole.MarkupLine($"[bold turquoise2]{_combinedBookmarks.Count} unique bookmarks in total.[/]");
 
             foreach (var bookmark in _combinedBookmarks.OrderBy(x => x.Name))

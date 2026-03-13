@@ -9,6 +9,7 @@ namespace TinyCity.Commands.Settings
         public bool SearchUrls { get; set; }
         public string Query { get; set; } = string.Empty;
         public bool Export { get; set; }
+        public bool Plain { get; set; }
         public string ExportFormat { get; set; } = "- [{name}]({url}) ({urlhost})";
 
         private readonly Argument<string> _queryArgument;
@@ -16,6 +17,7 @@ namespace TinyCity.Commands.Settings
         private readonly Option<bool> _launchOption;
         private readonly Option<bool> _searchUrlsOption;
         private readonly Option<bool> _exportOption;
+        private readonly Option<bool> _plainOption;
         private readonly Option<string> _exportFormatOption;
 
         public SearchCommandSettings()
@@ -25,6 +27,7 @@ namespace TinyCity.Commands.Settings
             _launchOption = new Option<bool>(new[] { "-l", "--launch" }, "Launch the first bookmark found in your default browser. If no bookmarks are found, nothing will happen.");
             _searchUrlsOption = new Option<bool>(new[] { "-u", "--urls" }, "Also search bookmark urls.");
             _exportOption = new Option<bool>(new[] { "-e", "--export" }, "Exports the results as 'exported-bookmarks.md' to the same directory as tinycity.");
+            _plainOption = new Option<bool>("--plain", "Output results as plain text without ANSI formatting.");
             _exportFormatOption = new Option<string>("--export-format", () => "- [{name}]({url}) ({urlhost})", "When exporting, sets the format of each link");
         }
 
@@ -37,6 +40,7 @@ namespace TinyCity.Commands.Settings
                 Launch = bindingContext.ParseResult.GetValueForOption(_launchOption),
                 SearchUrls = bindingContext.ParseResult.GetValueForOption(_searchUrlsOption),
                 Export = bindingContext.ParseResult.GetValueForOption(_exportOption),
+                Plain = bindingContext.ParseResult.GetValueForOption(_plainOption),
                 ExportFormat = bindingContext.ParseResult.GetValueForOption(_exportFormatOption) ?? "- [{name}]({url}) ({urlhost})"
             };
         }
@@ -48,6 +52,7 @@ namespace TinyCity.Commands.Settings
             command.AddOption(_launchOption);
             command.AddOption(_searchUrlsOption);
             command.AddOption(_exportOption);
+            command.AddOption(_plainOption);
             command.AddOption(_exportFormatOption);
         }
     }

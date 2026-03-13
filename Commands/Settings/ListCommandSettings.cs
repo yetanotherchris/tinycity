@@ -6,16 +6,19 @@ namespace TinyCity.Commands.Settings
     public class ListCommandSettings : BaseSettings<ListCommandSettings>
     {
         public bool Export { get; set; }
+        public bool Plain { get; set; }
         public string ExportFormat { get; set; } = "- [{name}]({url}) ({urlhost})";
 
         private readonly Option<bool> _extraOption;
         private readonly Option<bool> _exportOption;
+        private readonly Option<bool> _plainOption;
         private readonly Option<string> _exportFormatOption;
 
         public ListCommandSettings()
         {
             _extraOption = new Option<bool>("--extra", "Displays extra information including how long the application took to run.");
             _exportOption = new Option<bool>(new[] { "-e", "--export" }, "Exports the results as 'exported-bookmarks.md' to the same directory as tinycity.");
+            _plainOption = new Option<bool>("--plain", "Output results as plain text without ANSI formatting.");
             _exportFormatOption = new Option<string>("--export-format", () => "- [{name}]({url}) ({urlhost})", "When exporting, sets the format of each link");
         }
 
@@ -25,6 +28,7 @@ namespace TinyCity.Commands.Settings
             {
                 Extra = bindingContext.ParseResult.GetValueForOption(_extraOption),
                 Export = bindingContext.ParseResult.GetValueForOption(_exportOption),
+                Plain = bindingContext.ParseResult.GetValueForOption(_plainOption),
                 ExportFormat = bindingContext.ParseResult.GetValueForOption(_exportFormatOption) ?? "- [{name}]({url}) ({urlhost})"
             };
         }
@@ -33,6 +37,7 @@ namespace TinyCity.Commands.Settings
         {
             command.AddOption(_extraOption);
             command.AddOption(_exportOption);
+            command.AddOption(_plainOption);
             command.AddOption(_exportFormatOption);
         }
     }
