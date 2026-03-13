@@ -102,5 +102,23 @@ dotnet run -- search "gmail"
 dotnet run -- search "openrouter" --launch
 ```
 
+## Agent skill
+
+Tinycity includes a `SKILL.md` compatible with [vercel-labs/skills](https://github.com/vercel-labs/skills), which lets AI agents (Claude Code, GitHub Copilot, etc.) run tinycity commands on your behalf.
+
+Install the skill into your agent environment:
+
+```bash
+npx skills install https://github.com/yetanotherchris/tinycity
+```
+
+Once installed, you can ask your agent things like:
+- "Search my bookmarks for GitHub"
+- "List all my bookmarks"
+- "Open the first result for gmail"
+- "Export my Chrome bookmarks to ~/backup"
+
+The skill will install tinycity automatically if it is not already present.
+
 ### Why the tinycity name?
 The name was generated using a name generator.
