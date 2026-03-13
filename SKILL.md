@@ -101,4 +101,4 @@ tinycity import --target all --directory ~/backup
 - If results are empty, tell the user and suggest checking sources with `tinycity config`.
 - Do not guess or fabricate bookmark data — always run the command and return the real output.
 - Ensure the results you display match the tiny results, which should include the hyperlinks.
-  - For example searching for Google Drive bookmarks, the result would show "Google Drive (drive.google.com)" and "Google Drive" would be a hyperlink to the full url.
+  - For example searching for Google Drive bookmarks, the result would display the equivalent to this markdown: "[Google Drive](drive.google.com) (drive.google.com)"
