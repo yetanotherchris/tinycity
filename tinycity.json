@@ -1,19 +1,19 @@
 {
-  "homepage": "https://github.com/yetanotherchris/tinycity",
-  "version": "3.2.1",
   "description": "Ask any large language model from your terminal via OpenAI-compatible APIs.",
-  "license": "MIT License",
+  "homepage": "https://github.com/yetanotherchris/tinycity",
   "architecture": {
     "64bit": {
+      "pre_install": [
+        "Rename-Item \"$dir\\tinycity-v3.3.0-win-x64.exe\" \"tinycity.exe\""
+      ],
       "bin": [
         "tinycity.exe"
       ],
-      "pre_install": [
-        "Rename-Item \"$dir\\tinycity-v3.2.1-win-x64.exe\" \"tinycity.exe\""
-      ],
-      "hash": "4B4A3440CE000C496D87FB1A5825D1EB2DDCCFD872FBCAD509212501F6568024",
+      "url": "https://github.com/yetanotherchris/tinycity/releases/download/v3.3.0/tinycity-v3.3.0-win-x64.exe",
       "extract_dir": "",
-      "url": "https://github.com/yetanotherchris/tinycity/releases/download/v3.2.1/tinycity-v3.2.1-win-x64.exe"
+      "hash": "415D348D869F7AA0488675B7237CA4781721C685EC5591B3C0B6DB4169C53BAD"
     }
-  }
+  },
+  "version": "3.3.0",
+  "license": "MIT License"
 }
