@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using TinyCity.Model;
@@ -92,7 +93,7 @@ namespace TinyCity.Services
                 node.Bookmarks.Add(bookmark);
             }
 
-            foreach (var forest in forests.Values)
+            foreach (var forest in forests.Values.OrderBy(x => x.Name))
             {
                 WalkFolders(forest, sb, new List<string>(), exportFormat);
             }
@@ -129,7 +130,7 @@ namespace TinyCity.Services
                 }
             }
 
-            foreach (var child in node.Children.Values)
+            foreach (var child in node.Children.Values.OrderBy(x => x.Name))
             {
                 WalkFolders(child, sb, chain, exportFormat);
             }
@@ -137,11 +138,39 @@ namespace TinyCity.Services
 
         private static string FormatLink(BookmarkNode bookmark, string exportFormat)
         {
-            string urlHost = new Uri(bookmark.Url!).Host;
-            return exportFormat
+            string urlHost;
+            if (bookmark.Url != null && bookmark.Url.StartsWith("file://", StringComparison.OrdinalIgnoreCase))
+            {
+                urlHost = "file://";
+            }
+            else
+            {
+                try
+                {
+                    urlHost = new Uri(bookmark.Url!).Host;
+                }
+                catch
+                {
+                    urlHost = "";
+                }
+            }
+
+            string result = exportFormat
                 .Replace("{name}", bookmark.Name)
-                .Replace("{url}", bookmark.Url)
-                .Replace("{urlhost}", urlHost);
+                .Replace("{url}", bookmark.Url);
+
+            if (string.IsNullOrEmpty(urlHost))
+            {
+                result = result
+                    .Replace(" ({urlhost})", "")
+                    .Replace("{urlhost}", "");
+            }
+            else
+            {
+                result = result.Replace("{urlhost}", urlHost);
+            }
+
+            return result;
         }
 
         public static string ExportToHtml(List<BookmarkNode> bookmarks)
