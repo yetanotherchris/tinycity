@@ -25,6 +25,9 @@ namespace TinyCity.Model
         [JsonPropertyName("children")]
         public List<BookmarkNode>? Children { get; set; }
 
+        [JsonIgnore]
+        public List<string>? FolderPath { get; set; }
+
         public bool Equals(BookmarkNode? other)
         {
             if (other is null) return false;

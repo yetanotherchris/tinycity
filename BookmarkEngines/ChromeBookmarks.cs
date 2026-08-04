@@ -72,13 +72,20 @@ namespace TinyCity.BookmarkEngines
             var bookmarksList = new List<BookmarkNode>();
             foreach (BookmarkNode bookmark in bookmarkNode.Children)
             {
-                Recurse(bookmarksList, bookmark);
+                if (bookmark.Type == "folder")
+                {
+                    Recurse(bookmarksList, bookmark, [bookmarkNode.Name, bookmark.Name]);
+                }
+                else
+                {
+                    Recurse(bookmarksList, bookmark, [bookmarkNode.Name]);
+                }
             }
 
             return bookmarksList;
         }
 
-        static void Recurse(List<BookmarkNode> list, BookmarkNode bookmark)
+        static void Recurse(List<BookmarkNode> list, BookmarkNode bookmark, List<string> folderPath)
         {
             if (bookmark.Children?.Count > 0)
             {
@@ -86,17 +93,18 @@ namespace TinyCity.BookmarkEngines
                 {
                     if (child.Type == "url")
                     {
+                        child.FolderPath = [.. folderPath];
                         list.Add(child);
                     }
-
-                    if (child.Children?.Count > 0)
+                    else if (child.Type == "folder")
                     {
-                        Recurse(list, child);
+                        Recurse(list, child, [.. folderPath, child.Name]);
                     }
                 }
             }
             else
             {
+                bookmark.FolderPath = [.. folderPath];
                 list.Add(bookmark);
             }
         }
