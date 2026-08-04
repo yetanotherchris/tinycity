@@ -58,6 +58,92 @@ namespace TinyCity.Services
             return sb.ToString();
         }
 
+        public static string ExportToMarkdownFoldered(List<BookmarkNode> bookmarks, string exportFormat)
+        {
+            var sb = new StringBuilder();
+            var flatBookmarks = new List<BookmarkNode>();
+            var forests = new Dictionary<string, FolderNode>();
+
+            foreach (var bookmark in bookmarks)
+            {
+                if (string.IsNullOrEmpty(bookmark.Url))
+                {
+                    continue;
+                }
+
+                if (bookmark.FolderPath == null || bookmark.FolderPath.Count <= 1)
+                {
+                    flatBookmarks.Add(bookmark);
+                    continue;
+                }
+
+                string rootName = bookmark.FolderPath[0];
+                if (!forests.TryGetValue(rootName, out var root))
+                {
+                    root = new FolderNode { Name = rootName, IsRoot = true };
+                    forests[rootName] = root;
+                }
+
+                var node = root;
+                foreach (var folderName in bookmark.FolderPath.Skip(1))
+                {
+                    node = node.GetOrAddChild(folderName);
+                }
+                node.Bookmarks.Add(bookmark);
+            }
+
+            foreach (var forest in forests.Values)
+            {
+                WalkFolders(forest, sb, new List<string>(), exportFormat);
+            }
+
+            foreach (var bookmark in flatBookmarks)
+            {
+                sb.AppendLine(FormatLink(bookmark, exportFormat));
+            }
+
+            return sb.ToString();
+        }
+
+        private static void WalkFolders(FolderNode node, StringBuilder sb, List<string> chain, string exportFormat)
+        {
+            if (!node.IsRoot)
+            {
+                if (node.Bookmarks.Count > 0)
+                {
+                    string title = chain.Count > 0
+                        ? string.Join(" -> ", [.. chain, node.Name])
+                        : node.Name;
+                    sb.AppendLine($"## {title}");
+                    sb.AppendLine();
+                    foreach (var bookmark in node.Bookmarks.OrderBy(x => x.Name))
+                    {
+                        sb.AppendLine(FormatLink(bookmark, exportFormat));
+                    }
+                    sb.AppendLine();
+                    chain = new List<string>();
+                }
+                else if (!string.IsNullOrEmpty(node.Name))
+                {
+                    chain = [.. chain, node.Name];
+                }
+            }
+
+            foreach (var child in node.Children.Values)
+            {
+                WalkFolders(child, sb, chain, exportFormat);
+            }
+        }
+
+        private static string FormatLink(BookmarkNode bookmark, string exportFormat)
+        {
+            string urlHost = new Uri(bookmark.Url!).Host;
+            return exportFormat
+                .Replace("{name}", bookmark.Name)
+                .Replace("{url}", bookmark.Url)
+                .Replace("{urlhost}", urlHost);
+        }
+
         public static string ExportToHtml(List<BookmarkNode> bookmarks)
         {
             var sb = new StringBuilder();
@@ -80,6 +166,27 @@ namespace TinyCity.Services
 
             sb.AppendLine("</DL><p>");
             return sb.ToString();
+        }
+
+        private sealed class FolderNode
+        {
+            public string Name { get; init; } = "";
+
+            public bool IsRoot { get; init; }
+
+            public List<BookmarkNode> Bookmarks { get; } = new List<BookmarkNode>();
+
+            public Dictionary<string, FolderNode> Children { get; } = new Dictionary<string, FolderNode>();
+
+            public FolderNode GetOrAddChild(string name)
+            {
+                if (!Children.TryGetValue(name, out var child))
+                {
+                    child = new FolderNode { Name = name };
+                    Children[name] = child;
+                }
+                return child;
+            }
         }
     }
 }

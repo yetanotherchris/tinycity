@@ -1,9 +1,9 @@
 ﻿using Spectre.Console;
 using System.CommandLine;
-using System.Text;
 using TinyCity.BookmarkEngines;
 using TinyCity.Model;
 using TinyCity.Commands.Settings;
+using TinyCity.Services;
 
 namespace TinyCity.Commands
 {
@@ -18,7 +18,6 @@ namespace TinyCity.Commands
 
         public override Task<int> ExecuteAsync(ListCommandSettings settings)
         {
-            var exportStringBuilder = new StringBuilder();
             if (settings.Plain)
             {
                 Console.WriteLine($"{_combinedBookmarks.Count} unique bookmarks in total.");
@@ -49,19 +48,12 @@ namespace TinyCity.Commands
                     string link = $"[link={bookmarkUrl}]{bookmarkName}[/]";
                     string urlHost = new Uri(bookmark.Url).Host;
                     AnsiConsole.MarkupLine($" • [bold chartreuse1]{link}[/] ({urlHost})");
-
-                    string exportLine = settings.ExportFormat
-                                                .Replace("{name}", Markup.Escape(bookmarkName))
-                                                .Replace("{url}", bookmarkUrl)
-                                                .Replace("{urlhost}", urlHost);
-
-                    exportStringBuilder.AppendLine(exportLine);
                 }
             }
 
             if (settings.Export)
             {
-                File.WriteAllText("exported-bookmarks.md", exportStringBuilder.ToString());
+                File.WriteAllText("exported-bookmarks.md", BookmarkExporter.ExportToMarkdownFoldered(_combinedBookmarks, settings.ExportFormat));
                 AnsiConsole.MarkupLine($"[bold green]Exported to all bookmarks 'exported-bookmarks.md'[/].");
             }
 
