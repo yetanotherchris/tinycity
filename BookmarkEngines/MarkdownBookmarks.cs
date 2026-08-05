@@ -25,6 +25,8 @@ namespace TinyCity.BookmarkEngines
                 {
                     string markdown = File.ReadAllText(file);
                     var bookmarks = ParseMarkdownFile(markdown);
+                    string fileName = Path.GetFileName(file);
+                    foreach (var bm in bookmarks) bm.SourceFile = fileName;
                     Bookmarks.AddRange(bookmarks);
 
                     logItems.Add($" {Emoji.Known.CheckMarkButton} Markdown bookmarks: Loaded {bookmarks.Count} bookmarks from '{file}'.");

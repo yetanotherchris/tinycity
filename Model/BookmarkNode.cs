@@ -28,6 +28,9 @@ namespace TinyCity.Model
         [JsonIgnore]
         public List<string>? FolderPath { get; set; }
 
+        [JsonIgnore]
+        public string? SourceFile { get; set; }
+
         public bool Equals(BookmarkNode? other)
         {
             if (other is null) return false;

@@ -62,19 +62,24 @@ namespace TinyCity.Services
         public static string ExportToMarkdownFoldered(List<BookmarkNode> bookmarks, string exportFormat)
         {
             var sb = new StringBuilder();
-            var flatBookmarks = new List<BookmarkNode>();
+
+            var browserBookmarks = bookmarks.Where(b => b.SourceFile == null).ToList();
+            var markdownGroups = bookmarks
+                .Where(b => b.SourceFile != null)
+                .GroupBy(b => b.SourceFile)
+                .OrderBy(g => g.Key)
+                .ToList();
+
+            var flatBrowserBookmarks = new List<BookmarkNode>();
             var forests = new Dictionary<string, FolderNode>();
 
-            foreach (var bookmark in bookmarks)
+            foreach (var bookmark in browserBookmarks)
             {
-                if (string.IsNullOrEmpty(bookmark.Url))
-                {
-                    continue;
-                }
+                if (string.IsNullOrEmpty(bookmark.Url)) continue;
 
                 if (bookmark.FolderPath == null || bookmark.FolderPath.Count <= 1)
                 {
-                    flatBookmarks.Add(bookmark);
+                    flatBrowserBookmarks.Add(bookmark);
                     continue;
                 }
 
@@ -87,52 +92,63 @@ namespace TinyCity.Services
 
                 var node = root;
                 foreach (var folderName in bookmark.FolderPath.Skip(1))
-                {
                     node = node.GetOrAddChild(folderName);
-                }
                 node.Bookmarks.Add(bookmark);
             }
 
-            foreach (var forest in forests.Values.OrderBy(x => x.Name))
-            {
-                WalkFolders(forest, sb, new List<string>(), exportFormat);
-            }
-
-            foreach (var bookmark in flatBookmarks)
-            {
+            foreach (var bookmark in flatBrowserBookmarks.OrderBy(x => x.Name))
                 sb.AppendLine(FormatLink(bookmark, exportFormat));
+            if (flatBrowserBookmarks.Count > 0)
+                sb.AppendLine();
+
+            foreach (var forest in forests.Values.OrderBy(x => x.Name))
+                WalkFolders(forest, sb, 2, new List<string>(), exportFormat);
+
+            foreach (var group in markdownGroups)
+            {
+                sb.AppendLine($"## {group.Key ?? "Markdown bookmarks"}");
+                sb.AppendLine();
+                foreach (var bookmark in group.OrderBy(b => b.Name))
+                    sb.AppendLine(FormatLink(bookmark, exportFormat));
+                sb.AppendLine();
             }
 
             return sb.ToString();
         }
 
-        private static void WalkFolders(FolderNode node, StringBuilder sb, List<string> chain, string exportFormat)
+        private static void WalkFolders(FolderNode node, StringBuilder sb, int headingLevel, List<string> chain, string exportFormat)
         {
-            if (!node.IsRoot)
+            if (node.IsRoot)
             {
-                if (node.Bookmarks.Count > 0)
-                {
-                    string title = chain.Count > 0
-                        ? string.Join(" -> ", [.. chain, node.Name])
-                        : node.Name;
-                    sb.AppendLine($"## {title}");
-                    sb.AppendLine();
-                    foreach (var bookmark in node.Bookmarks.OrderBy(x => x.Name))
-                    {
-                        sb.AppendLine(FormatLink(bookmark, exportFormat));
-                    }
-                    sb.AppendLine();
-                    chain = new List<string>();
-                }
-                else if (!string.IsNullOrEmpty(node.Name))
-                {
-                    chain = [.. chain, node.Name];
-                }
+                foreach (var child in node.Children.Values.OrderBy(x => x.Name))
+                    WalkFolders(child, sb, headingLevel, new List<string>(), exportFormat);
+                return;
             }
 
-            foreach (var child in node.Children.Values.OrderBy(x => x.Name))
+            bool hasBookmarks = node.Bookmarks.Count > 0;
+            bool isMultiBranch = node.Children.Count >= 2;
+
+            if (hasBookmarks || isMultiBranch)
             {
-                WalkFolders(child, sb, chain, exportFormat);
+                string title = chain.Count > 0
+                    ? string.Join(" -> ", [.. chain, node.Name])
+                    : node.Name;
+                sb.AppendLine($"{new string('#', Math.Min(headingLevel, 4))} {title}");
+                sb.AppendLine();
+
+                foreach (var bookmark in node.Bookmarks.OrderBy(x => x.Name))
+                    sb.AppendLine(FormatLink(bookmark, exportFormat));
+                if (hasBookmarks)
+                    sb.AppendLine();
+
+                foreach (var child in node.Children.Values.OrderBy(x => x.Name))
+                    WalkFolders(child, sb, headingLevel + 1, new List<string>(), exportFormat);
+            }
+            else if (node.Children.Count > 0)
+            {
+                // Single-branch empty folder: accumulate in chain for arrow notation
+                foreach (var child in node.Children.Values.OrderBy(x => x.Name))
+                    WalkFolders(child, sb, headingLevel, [.. chain, node.Name], exportFormat);
             }
         }
 
