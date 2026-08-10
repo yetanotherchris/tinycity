@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Text;
 using System.Text.Json;
 using TinyCity.Model;
@@ -96,10 +95,14 @@ namespace TinyCity.Services
                 node.Bookmarks.Add(bookmark);
             }
 
-            foreach (var bookmark in flatBrowserBookmarks.OrderBy(x => x.Name))
-                sb.AppendLine(FormatLink(bookmark, exportFormat));
             if (flatBrowserBookmarks.Count > 0)
+            {
+                sb.AppendLine("## Bookmarks bar");
                 sb.AppendLine();
+                foreach (var bookmark in flatBrowserBookmarks.OrderBy(x => x.Name))
+                    sb.AppendLine(FormatLink(bookmark, exportFormat));
+                sb.AppendLine();
+            }
 
             foreach (var forest in forests.Values.OrderBy(x => x.Name))
                 WalkFolders(forest, sb, 2, new List<string>(), exportFormat);
@@ -157,7 +160,7 @@ namespace TinyCity.Services
             string urlHost;
             if (bookmark.Url != null && bookmark.Url.StartsWith("file://", StringComparison.OrdinalIgnoreCase))
             {
-                urlHost = "file://";
+                urlHost = "";
             }
             else
             {
