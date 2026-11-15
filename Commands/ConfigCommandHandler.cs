@@ -12,6 +12,8 @@ namespace TinyCity.Commands
         private readonly TinyCitySettings _tinyCitySettings;
         private readonly BookmarkAggregator _bookmarkAggregator;
 
+        private static readonly string[] KnownBrowsers = new[] { "chrome", "brave", "edge", "opera", "librewolf", "mullvad" };
+
         public ConfigCommandHandler(TinyCitySettings tinyCitySettings, BookmarkAggregator bookmarkAggregator)
         {
             _tinyCitySettings = tinyCitySettings;
@@ -90,7 +92,7 @@ namespace TinyCity.Commands
             string resolvedPath;
             SourceType sourceType;
 
-            if (sourceLower == "chrome" || sourceLower == "brave" || sourceLower == "edge" || sourceLower == "opera" || sourceLower == "librewolf" || sourceLower == "mullvad")
+            if (KnownBrowsers.Contains(sourceLower))
             {
                 resolvedPath = ResolveBrowserPath(sourceLower, customDirectory);
                 sourceType = SourceType.Browser;
@@ -154,7 +156,7 @@ namespace TinyCity.Commands
             string resolvedPath;
             bool removed = false;
 
-            if (sourceLower == "chrome" || sourceLower == "brave" || sourceLower == "edge" || sourceLower == "opera" || sourceLower == "librewolf" || sourceLower == "mullvad")
+            if (KnownBrowsers.Contains(sourceLower))
             {
                 resolvedPath = ResolveBrowserPath(sourceLower, null);
                 if (_tinyCitySettings.BrowserBookmarkPaths.Contains(resolvedPath))
