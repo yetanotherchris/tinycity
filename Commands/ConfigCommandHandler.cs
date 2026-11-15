@@ -90,7 +90,7 @@ namespace TinyCity.Commands
             string resolvedPath;
             SourceType sourceType;
 
-            if (sourceLower == "chrome" || sourceLower == "brave" || sourceLower == "edge" || sourceLower == "opera")
+            if (sourceLower == "chrome" || sourceLower == "brave" || sourceLower == "edge" || sourceLower == "opera" || sourceLower == "librewolf" || sourceLower == "mullvad")
             {
                 resolvedPath = ResolveBrowserPath(sourceLower, customDirectory);
                 sourceType = SourceType.Browser;
@@ -154,7 +154,7 @@ namespace TinyCity.Commands
             string resolvedPath;
             bool removed = false;
 
-            if (sourceLower == "chrome" || sourceLower == "brave" || sourceLower == "edge" || sourceLower == "opera")
+            if (sourceLower == "chrome" || sourceLower == "brave" || sourceLower == "edge" || sourceLower == "opera" || sourceLower == "librewolf" || sourceLower == "mullvad")
             {
                 resolvedPath = ResolveBrowserPath(sourceLower, null);
                 if (_tinyCitySettings.BrowserBookmarkPaths.Contains(resolvedPath))
@@ -209,6 +209,8 @@ namespace TinyCity.Commands
                 "opera" => BrowserKnownPaths.OperaBookmarksPath,
                 "brave" => BrowserKnownPaths.BraveBookmarksPath,
                 "edge" => BrowserKnownPaths.EdgeBookmarksPath,
+                "librewolf" => BrowserKnownPaths.LibrewolfBookmarksPath,
+                "mullvad" => BrowserKnownPaths.MullvadBookmarksPath,
                 _ => throw new ArgumentException($"Unknown browser type: {browser}")
             };
         }
@@ -227,10 +229,13 @@ namespace TinyCity.Commands
                 return SourceType.Html;
             }
             else if (filename.Equals("Bookmarks", StringComparison.OrdinalIgnoreCase) ||
+                     filename.Equals("bookmarks.json", StringComparison.OrdinalIgnoreCase) ||
                      path.Contains("Chrome", StringComparison.OrdinalIgnoreCase) ||
                      path.Contains("Brave", StringComparison.OrdinalIgnoreCase) ||
                      path.Contains("Edge", StringComparison.OrdinalIgnoreCase) ||
-                     path.Contains("Opera", StringComparison.OrdinalIgnoreCase))
+                     path.Contains("Opera", StringComparison.OrdinalIgnoreCase) ||
+                     path.Contains("LibreWolf", StringComparison.OrdinalIgnoreCase) ||
+                     path.Contains("MullvadBrowser", StringComparison.OrdinalIgnoreCase))
             {
                 return SourceType.Browser;
             }

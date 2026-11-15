@@ -95,5 +95,51 @@ namespace TinyCity
                 }
             }
         }
+
+        public static string LibrewolfBookmarksPath
+        {
+            get
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    return Path.Combine(Environment.GetEnvironmentVariable("APPDATA"), "LibreWolf", "LibreWolf", "Bookmarks.html");
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "LibreWolf", "Bookmarks.html");
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "share", "librewolf", "Bookmarks.html");
+                }
+                else
+                {
+                    throw new NotSupportedException("Unsupported platform.");
+                }
+            }
+        }
+
+        public static string MullvadBookmarksPath
+        {
+            get
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    return Path.Combine(Environment.GetEnvironmentVariable("APPDATA"), "MullvadBrowser", "Default", "Data", "bookmarks.json");
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "MullvadBrowser", "Default", "Data", "bookmarks.json");
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "mullvad-browser", "Default", "Data", "bookmarks.json");
+                }
+                else
+                {
+                    throw new NotSupportedException("Unsupported platform.");
+                }
+            }
+        }
     }
 }

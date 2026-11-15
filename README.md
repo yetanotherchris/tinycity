@@ -5,7 +5,7 @@ It doesn't manage your bookmarks (adding/editing/deleting), it just lists, searc
 
 The terminal output includes links that can be clicked. It supports the following bookmarks:
 
-- Chrome, Brave, Opera and Edge bookmarks (Chromium JSON bookmark format)
+- Chrome, Brave, Opera, Edge, LibreWolf and Mullvad bookmarks (Chromium JSON bookmark format or Netscape HTML export format)
 - Markdown files with links.
 - Bookmark export HTML (Netscape) format which all browsers export their bookmarks as.
 
