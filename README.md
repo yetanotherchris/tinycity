@@ -92,7 +92,7 @@ tinycity import --target all --directory ~/backup
 ```
 
 #### Local development
-If you clone the source using `git clone` (requires [.NET 10](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) or later):
+If you clone the source using `git clone` (requires [.NET 11](https://dotnet.microsoft.com/en-us/download/dotnet/11.0) or later):
 
 ```
 dotnet run --
